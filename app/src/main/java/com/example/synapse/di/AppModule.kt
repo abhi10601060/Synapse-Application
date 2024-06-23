@@ -1,6 +1,7 @@
 package com.example.synapse.di
 
 import com.example.synapse.model.DITest
+import com.example.synapse.network.socket.SocketClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,5 +16,11 @@ class AppModule {
     @Singleton
     fun getDiTestModel() : DITest{
         return DITest("test for di")
+    }
+
+    @Provides
+    @Singleton
+    fun getSocketClient() : SocketClient {
+        return SocketClient()
     }
 }

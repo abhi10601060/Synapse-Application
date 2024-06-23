@@ -1,6 +1,7 @@
 package com.example.synapse.network.socket
 
 import android.util.Log
+import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -51,6 +52,7 @@ class SocketClient {
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 super.onClosed(webSocket, code, reason)
                 Log.d(TAG, "onClosed: code: $code, reason: $reason")
+                listener.onSocketClosed()
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -66,7 +68,7 @@ class SocketClient {
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
                 Log.d(TAG, "onMessage:  $text")
-                listener.onSocketMessage(1, message = text)
+                listener.onSocketMessage(text)
             }
 
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -77,6 +79,7 @@ class SocketClient {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 super.onOpen(webSocket, response)
                 Log.d(TAG, "onOpen: ${response.body}")
+                listener.onSocketOpen()
             }
         }
     }
