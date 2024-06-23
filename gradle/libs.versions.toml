@@ -18,6 +18,7 @@ activity = "1.8.0"
 constraintlayout = "2.1.4"
 okhttp = "4.10.0"
 retrofit = "2.9.0"
+webrtc = "1.0.5"
 
 [libraries]
 adapter-rxjava = { module = "com.squareup.retrofit2:adapter-rxjava", version.ref = "adapterRxjava" }
@@ -40,6 +41,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+webrtc = { module = "com.mesibo.api:webrtc", version.ref = "webrtc" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
