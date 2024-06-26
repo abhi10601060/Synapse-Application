@@ -8,6 +8,7 @@ import com.example.synapse.network.socket.SocketListener
 import com.example.synapse.network.webrtc.WebrtcClient
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import org.webrtc.SessionDescription
 import javax.inject.Inject
 
 class MainRepo @Inject constructor(
@@ -22,15 +23,19 @@ class MainRepo @Inject constructor(
     private val TAG = "MAIN_REPO"
 
     override fun onSocketMessage(message: String) {
-        Log.d(TAG, "onSocketMessage: ")
+        Log.d(TAG, "onSocketMessage: $message")
         val wsMessage = gson.fromJson(message, JsonObject::class.java)
         val messageType = wsMessage.get("type").asInt
+        val userName = wsMessage.get("user").asString
+        val data = wsMessage.get("data").asString
         when(messageType){
             WebsocketMessageType.ANSWER ->{
                 // TODO: Will always be a accepted connection sdp from streamer
             }
             WebsocketMessageType.OFFER ->{
-                // TODO: Will always be a watch stream request sdp from viewer
+                val session = SessionDescription(SessionDescription.Type.OFFER, data)
+                val viewerPeerConnection = webrtcClient.addViewerToStream(session)
+
             }
             WebsocketMessageType.CLOSE_STREAM ->{
 

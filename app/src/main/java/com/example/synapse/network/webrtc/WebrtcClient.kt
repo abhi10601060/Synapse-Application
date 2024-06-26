@@ -122,8 +122,8 @@ class WebrtcClient (
         }, mediaConstraints)
     }
 
-    private fun createAnswer(){
-        streamerConnection?.createAnswer(object : MySdpObserver(){
+    private fun createAnswer(peerConnection: PeerConnection?){
+        peerConnection?.createAnswer(object : MySdpObserver(){
             override fun onCreateSuccess(sdp: SessionDescription?) {
                 super.onCreateSuccess(sdp)
                 setLocalDescription(streamerConnection, sdp)
@@ -171,10 +171,12 @@ class WebrtcClient (
         addIceCandidate(candidate)
     }
 
-    fun addViewerToStream(){
+    fun addViewerToStream(sessionDescription: SessionDescription) : PeerConnection?{
         val peerConnection = createPeerConnection()
+        setRemoteDescription(peerConnection, sessionDescription)
         peerConnection?.addStream(localStream)
         viewersConnections.add(peerConnection)
+        return peerConnection
     }
 
     fun closeWatchConnection(){
