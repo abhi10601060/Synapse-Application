@@ -113,7 +113,7 @@ class WebrtcClient (
         return peerConnectionFactory.createPeerConnection(iceServer, observer)
     }
 
-    private fun createOffer(){
+    private fun createOffer(listener : (SessionDescription) -> Unit){
         streamerConnection?.createOffer(object : MySdpObserver(){
             override fun onCreateSuccess(sdp: SessionDescription?) {
                 super.onCreateSuccess(sdp)
@@ -122,11 +122,12 @@ class WebrtcClient (
         }, mediaConstraints)
     }
 
-    private fun createAnswer(peerConnection: PeerConnection?){
+    private fun createAnswer(peerConnection: PeerConnection?, listener: (answer : SessionDescription) -> Unit){
         peerConnection?.createAnswer(object : MySdpObserver(){
             override fun onCreateSuccess(sdp: SessionDescription?) {
                 super.onCreateSuccess(sdp)
-                setLocalDescription(streamerConnection, sdp)
+                setLocalDescription(peerConnection, sdp)
+                listener(sdp!!)
             }
         }, mediaConstraints)
     }
@@ -145,10 +146,6 @@ class WebrtcClient (
         }
     }
 
-    fun onRemoteSessionReceived(sdp : SessionDescription){
-        setRemoteDescription(streamerConnection, sdp)
-    }
-
     private fun setRemoteDescription(peerConnection : PeerConnection?, sdp : SessionDescription?){
         try {
             peerConnection?.setRemoteDescription(object  : MySdpObserver(){
@@ -163,20 +160,32 @@ class WebrtcClient (
         }
     }
 
+    private fun addStreamerConnectionToWatch(answerSdp : SessionDescription){
+        setRemoteDescription(streamerConnection, answerSdp)
+    }
+
+    private fun addViewerToStream(offerSdp: SessionDescription, listener: (answer : SessionDescription) -> Unit) {
+        val peerConnection = createPeerConnection()
+        setRemoteDescription(peerConnection, offerSdp)
+        peerConnection?.addStream(localStream)
+        createAnswer(peerConnection, listener)
+        viewersConnections.add(peerConnection)
+    }
+
+    fun useOffer(offer : SessionDescription, answerListener : (answer : SessionDescription) -> Unit){
+        addViewerToStream(offer, answerListener)
+    }
+
+    fun useAnswer(answer: SessionDescription){
+        addStreamerConnectionToWatch(answer)
+    }
+
     fun addIceCandidate(iceCandidate: IceCandidate){
         streamerConnection?.addIceCandidate(iceCandidate)
     }
 
     fun sendIceCandidate(candidate: IceCandidate){
         addIceCandidate(candidate)
-    }
-
-    fun addViewerToStream(sessionDescription: SessionDescription) : PeerConnection?{
-        val peerConnection = createPeerConnection()
-        setRemoteDescription(peerConnection, sessionDescription)
-        peerConnection?.addStream(localStream)
-        viewersConnections.add(peerConnection)
-        return peerConnection
     }
 
     fun closeWatchConnection(){

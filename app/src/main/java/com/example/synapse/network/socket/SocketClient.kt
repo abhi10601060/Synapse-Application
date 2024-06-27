@@ -84,4 +84,10 @@ class SocketClient {
         }
     }
 
+    fun sendMessage(message : String){
+        val res = webSocket?.send(message)
+        if (res == null || !res){
+            Log.d(TAG, "sendMessage: message could not sent : $message")
+        }
+    }
 }

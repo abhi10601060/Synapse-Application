@@ -2,6 +2,7 @@ package com.example.synapse.repo
 
 import android.content.SharedPreferences
 import android.util.Log
+import com.example.synapse.model.WebSocketMessage
 import com.example.synapse.model.WebsocketMessageType
 import com.example.synapse.network.socket.SocketClient
 import com.example.synapse.network.socket.SocketListener
@@ -27,15 +28,19 @@ class MainRepo @Inject constructor(
         val wsMessage = gson.fromJson(message, JsonObject::class.java)
         val messageType = wsMessage.get("type").asInt
         val userName = wsMessage.get("user").asString
+        val target = wsMessage.get("target").asString
         val data = wsMessage.get("data").asString
         when(messageType){
             WebsocketMessageType.ANSWER ->{
-                // TODO: Will always be a accepted connection sdp from streamer
+                val answerSdp = SessionDescription(SessionDescription.Type.ANSWER, data)
+                webrtcClient.useAnswer(answerSdp)
             }
             WebsocketMessageType.OFFER ->{
-                val session = SessionDescription(SessionDescription.Type.OFFER, data)
-                val viewerPeerConnection = webrtcClient.addViewerToStream(session)
-
+                val offerSdp = SessionDescription(SessionDescription.Type.OFFER, data)
+                webrtcClient.useOffer(offerSdp, fun(answer : SessionDescription){
+                    val msg =WebSocketMessage(WebsocketMessageType.ANSWER, user = target, target= userName, data = answer)
+                    socketClient.sendMessage(gson.toJson(msg))
+                })
             }
             WebsocketMessageType.CLOSE_STREAM ->{
 
