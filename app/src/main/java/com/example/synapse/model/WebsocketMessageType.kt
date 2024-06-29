@@ -6,5 +6,6 @@ class WebsocketMessageType {
         val ANSWER = 2
         val CHAT = 0
         val CLOSE_STREAM = -1
+        val ICE = 4
     }
 }

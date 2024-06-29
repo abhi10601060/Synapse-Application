@@ -6,9 +6,13 @@ import com.example.synapse.model.WebSocketMessage
 import com.example.synapse.model.WebsocketMessageType
 import com.example.synapse.network.socket.SocketClient
 import com.example.synapse.network.socket.SocketListener
+import com.example.synapse.network.webrtc.MyPeerObserver
 import com.example.synapse.network.webrtc.WebrtcClient
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import org.webrtc.IceCandidate
+import org.webrtc.MediaStream
+import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 import javax.inject.Inject
 
@@ -20,8 +24,13 @@ class MainRepo @Inject constructor(
 ) : SocketListener {
 
 
-    //********************************************** Web Socket *****************************************************
+    //********************************************** Web Socket Listeners *****************************************************
     private val TAG = "MAIN_REPO"
+
+    override fun onSocketOpen() {
+        Log.d(TAG, "onSocketOpen: ")
+        // TODO: Start the peer connection process from the viewer Side
+    }
 
     override fun onSocketMessage(message: String) {
         Log.d(TAG, "onSocketMessage: $message")
@@ -33,11 +42,14 @@ class MainRepo @Inject constructor(
         when(messageType){
             WebsocketMessageType.ANSWER ->{
                 val answerSdp = SessionDescription(SessionDescription.Type.ANSWER, data)
-                webrtcClient.useAnswer(answerSdp)
+                webrtcClient.useAnswerFromStreamer(answerSdp)
             }
             WebsocketMessageType.OFFER ->{
                 val offerSdp = SessionDescription(SessionDescription.Type.OFFER, data)
-                webrtcClient.useOffer(offerSdp, fun(answer : SessionDescription){
+                webrtcClient.useOfferFromViewer(viewer = userName,
+                    peerConnObserver = getStreamerSidePeerObserver(userName),
+                    offer = offerSdp,
+                    answerListener =  fun(answer : SessionDescription){
                     val msg =WebSocketMessage(WebsocketMessageType.ANSWER, user = target, target= userName, data = answer)
                     socketClient.sendMessage(gson.toJson(msg))
                 })
@@ -48,6 +60,9 @@ class MainRepo @Inject constructor(
             WebsocketMessageType.CHAT ->{
 
             }
+            WebsocketMessageType.ICE ->{
+
+            }
             else -> {
                 Log.d(TAG, "onSocketMessage: else block")
             }
@@ -55,22 +70,88 @@ class MainRepo @Inject constructor(
 
     }
 
-    override fun onSocketOpen() {
-        Log.d(TAG, "onSocketOpen: ")
-    }
-
     override fun onSocketClosed() {
         Log.d(TAG, "onSocketClosed: ")
     }
 
-    suspend fun watchStream(streamId : String){
-        val token = sharedPreferences.getString("token", null)
-        socketClient.createWatchConnection(streamId, token!!, this)
-    }
+// ****************************************************** For Streamer **********************************************8
+
 
     suspend fun startStream(){
         val token = sharedPreferences.getString("token", null)
         socketClient.createStreamConnection(token!!, this)
+    }
+
+    private fun getStreamerSidePeerObserver(viewer :String) : MyPeerObserver{
+        return object : MyPeerObserver(viewer){
+            override fun onIceCandidate(p0: IceCandidate?) {
+                super.onIceCandidate(p0)
+                p0?.let {
+//                    webrtcClient.sendIceCandidate(user,it)
+                }
+            }
+
+            override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
+                super.onConnectionChange(newState)
+                Log.d("TAG", "onConnectionChange: $newState")
+                if (newState == PeerConnection.PeerConnectionState.CONNECTED){
+//                    listener?.onConnectionConnected()
+                }
+            }
+
+            override fun onAddStream(p0: MediaStream?) {
+                super.onAddStream(p0)
+                Log.d("TAG", "onAddStream: $p0")
+//                p0?.let { listener?.onRemoteStreamAdded(it) }
+            }
+        }
+    }
+
+
+
+// ****************************************************** For Viewer **************************************************************
+
+    suspend fun watchStream(streamId : String){
+        val token = sharedPreferences.getString("token", null)
+        socketClient.createWsConnForViewer(streamId, token!!, this)
+    }
+
+    fun createViewerSidePeerConnection(streamer: String){
+        webrtcClient.createViewerToStreamerConnection(getViewerSidePeerObserver("streamerName"))
+        webrtcClient.createOfferToStreamer{ offerSdp ->
+            val wsMessage = WebSocketMessage(
+                type = WebsocketMessageType.OFFER,
+                user = sharedPreferences.getString("userName", null)!!,
+                target = streamer,
+                data = gson.toJson(offerSdp)
+            )
+            socketClient.sendMessage(gson.toJson(wsMessage))
+        }
+    }
+
+    private fun getViewerSidePeerObserver(streamer : String) : MyPeerObserver{
+        return object : MyPeerObserver(streamer){
+            override fun onIceCandidate(p0: IceCandidate?) {
+                super.onIceCandidate(p0)
+                p0?.let {
+                    webrtcClient.addIceCandidateToStreamerConn(p0)
+                }
+            }
+
+            override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
+                super.onConnectionChange(newState)
+                Log.d("TAG", "onConnectionChange: $newState")
+                if (newState == PeerConnection.PeerConnectionState.CONNECTED){
+//                    listener?.onConnectionConnected()
+                }
+            }
+
+            override fun onAddStream(p0: MediaStream?) {
+                super.onAddStream(p0)
+                Log.d("TAG", "onAddStream: $p0")
+//                p0?.let { listener?.onRemoteStreamAdded(it) }
+            }
+        }
     }
 
 }

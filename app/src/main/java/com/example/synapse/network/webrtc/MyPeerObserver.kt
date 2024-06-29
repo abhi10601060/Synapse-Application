@@ -8,7 +8,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.Observer
 import org.webrtc.RtpReceiver
 
-class MyPeerObserver : Observer {
+open class MyPeerObserver(private val user : String) : Observer {
     
     val TAG = "MY_PEER_OBSERVER"
     

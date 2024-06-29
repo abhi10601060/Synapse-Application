@@ -1,7 +1,6 @@
 package com.example.synapse.network.socket
 
 import android.util.Log
-import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -27,7 +26,7 @@ class SocketClient {
         webSocket = okHttpClient.newWebSocket(request, getWebSocketListener(listener))
     }
 
-    fun createWatchConnection(streamId : String, token : String, listener : SocketListener){
+    fun createWsConnForViewer(streamId : String, token : String, listener : SocketListener){
         var watchUrl = "what ever url$streamId"
         val request = Request.Builder()
             .addHeader("Authentication-Token", token)

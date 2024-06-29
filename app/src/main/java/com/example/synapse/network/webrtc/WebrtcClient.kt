@@ -21,7 +21,6 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
-import javax.inject.Inject
 
 class WebrtcClient (
     private val context : Context
@@ -36,7 +35,7 @@ class WebrtcClient (
     private lateinit var observer : Observer
 
     private var streamerConnection : PeerConnection? = null
-    private val viewersConnections : ArrayList<PeerConnection?> = ArrayList()
+    private val viewersConnections : MutableMap<String, PeerConnection?> = HashMap<String, PeerConnection?>()
 
     private val peerConnectionFactory by lazy { createPeerConnectionFactory() }
     private val eglBaseContext = EglBase.create().eglBaseContext
@@ -58,6 +57,68 @@ class WebrtcClient (
     init {
         initializePeerConnectionFactoryOptions()
     }
+
+    private fun initializePeerConnectionFactoryOptions(){
+        val options = PeerConnectionFactory.InitializationOptions.builder(context)
+            .setEnableInternalTracer(true).setFieldTrials("WebRTC-H264HighProfile/Enabled/")
+            .createInitializationOptions()
+        PeerConnectionFactory.initialize(options)
+    }
+
+    private fun createPeerConnectionFactory() : PeerConnectionFactory{
+        return PeerConnectionFactory.builder()
+            .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBaseContext))
+            .setVideoEncoderFactory(DefaultVideoEncoderFactory(eglBaseContext, true, true))
+            .setOptions(
+                PeerConnectionFactory.Options().apply {
+                    disableEncryption = false
+                    disableNetworkMonitor = false
+                }
+            ).createPeerConnectionFactory()
+    }
+
+    private fun createPeerConnection(observer: Observer) : PeerConnection? {
+        return peerConnectionFactory.createPeerConnection(iceServer, observer)
+    }
+
+    private fun setLocalDescription(peerConnection : PeerConnection?, sdp : SessionDescription?){
+        try {
+            peerConnection?.setLocalDescription(object  : MySdpObserver(){
+                override fun onSetSuccess() {
+                    super.onSetSuccess()
+                    Log.d(TAG, "setLocalDescription, onSetSuccess: ")
+                }
+            }, sdp)
+        }
+        catch (e : Exception){
+            Log.d(TAG, "setLocalDescription: error : ${e.message}")
+        }
+    }
+
+    private fun setRemoteDescription(peerConnection : PeerConnection?, sdp : SessionDescription?){
+        try {
+            peerConnection?.setRemoteDescription(object  : MySdpObserver(){
+                override fun onSetSuccess() {
+                    super.onSetSuccess()
+                    Log.d(TAG, "setRemoteDescription, onSetSuccess: ")
+                }
+            }, sdp)
+        }
+        catch (e : Exception){
+            Log.d(TAG, "setRemoteDescription: error : ${e.message}")
+        }
+    }
+
+    fun addIceCandidate(iceCandidate: IceCandidate){
+        streamerConnection?.addIceCandidate(iceCandidate)
+    }
+
+    fun sendIceCandidate(candidate: IceCandidate){
+        addIceCandidate(candidate)
+    }
+
+
+    //******************************************************* For Streamer ************************************************88
 
     fun startScreenCaptureStream(permissionIntent : Intent){
         val displayMatrics = DisplayMetrics()
@@ -90,38 +151,6 @@ class WebrtcClient (
         })
     }
 
-    private fun initializePeerConnectionFactoryOptions(){
-        val options = PeerConnectionFactory.InitializationOptions.builder(context)
-            .setEnableInternalTracer(true).setFieldTrials("WebRTC-H264HighProfile/Enabled/")
-            .createInitializationOptions()
-        PeerConnectionFactory.initialize(options)
-    }
-
-    private fun createPeerConnectionFactory() : PeerConnectionFactory{
-        return PeerConnectionFactory.builder()
-            .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBaseContext))
-            .setVideoEncoderFactory(DefaultVideoEncoderFactory(eglBaseContext, true, true))
-            .setOptions(
-                PeerConnectionFactory.Options().apply {
-                    disableEncryption = false
-                    disableNetworkMonitor = false
-                }
-            ).createPeerConnectionFactory()
-    }
-
-    private fun createPeerConnection() : PeerConnection? {
-        return peerConnectionFactory.createPeerConnection(iceServer, observer)
-    }
-
-    private fun createOffer(listener : (SessionDescription) -> Unit){
-        streamerConnection?.createOffer(object : MySdpObserver(){
-            override fun onCreateSuccess(sdp: SessionDescription?) {
-                super.onCreateSuccess(sdp)
-                setLocalDescription(streamerConnection, sdp)
-            }
-        }, mediaConstraints)
-    }
-
     private fun createAnswer(peerConnection: PeerConnection?, listener: (answer : SessionDescription) -> Unit){
         peerConnection?.createAnswer(object : MySdpObserver(){
             override fun onCreateSuccess(sdp: SessionDescription?) {
@@ -132,63 +161,65 @@ class WebrtcClient (
         }, mediaConstraints)
     }
 
-    private fun setLocalDescription(peerConnection : PeerConnection?, sdp : SessionDescription?){
-        try {
-            peerConnection?.setLocalDescription(object  : MySdpObserver(){
-                override fun onSetSuccess() {
-                    super.onSetSuccess()
-                    Log.d(TAG, "setLocalDescription, onSetSuccess: ")
-                }
-            }, sdp)
-        }
-        catch (e : Exception){
-            Log.d(TAG, "setLocalDescription: error : ${e.message}")
-        }
-    }
-
-    private fun setRemoteDescription(peerConnection : PeerConnection?, sdp : SessionDescription?){
-        try {
-            peerConnection?.setRemoteDescription(object  : MySdpObserver(){
-                override fun onSetSuccess() {
-                    super.onSetSuccess()
-                    Log.d(TAG, "setRemoteDescription, onSetSuccess: ")
-                }
-            }, sdp)
-        }
-        catch (e : Exception){
-            Log.d(TAG, "setRemoteDescription: error : ${e.message}")
-        }
-    }
-
-    private fun addStreamerConnectionToWatch(answerSdp : SessionDescription){
-        setRemoteDescription(streamerConnection, answerSdp)
-    }
-
-    private fun addViewerToStream(offerSdp: SessionDescription, listener: (answer : SessionDescription) -> Unit) {
-        val peerConnection = createPeerConnection()
+    private fun addViewerToStream(viewer : String, peerConnObserver : Observer, offerSdp: SessionDescription, listener: (answer : SessionDescription) -> Unit) {
+        val peerConnection = createPeerConnection(peerConnObserver)
         setRemoteDescription(peerConnection, offerSdp)
         peerConnection?.addStream(localStream)
         createAnswer(peerConnection, listener)
-        viewersConnections.add(peerConnection)
+        viewersConnections[viewer] =  peerConnection
     }
 
-    fun useOffer(offer : SessionDescription, answerListener : (answer : SessionDescription) -> Unit){
-        addViewerToStream(offer, answerListener)
+    fun useOfferFromViewer(viewer :String, peerConnObserver : Observer , offer : SessionDescription, answerListener : (answer : SessionDescription) -> Unit){
+        addViewerToStream(viewer, peerConnObserver, offer, answerListener)
     }
 
-    fun useAnswer(answer: SessionDescription){
-        addStreamerConnectionToWatch(answer)
+    fun closeAllViewersConnections(){
+        try {
+            screenCapturer?.stopCapture()
+            screenCapturer?.dispose()
+            localStream?.dispose()
+            if (viewersConnections != null) {
+                for(peerKey in viewersConnections.keys){
+                    viewersConnections[peerKey]?.close()
+                    viewersConnections.remove(peerKey)
+                }
+            }
+        }catch (e:Exception) {
+            e.printStackTrace()
+        }
     }
 
-    fun addIceCandidate(iceCandidate: IceCandidate){
-        streamerConnection?.addIceCandidate(iceCandidate)
+    //******************************************************* For Viewer ************************************************88
+
+    fun createViewerToStreamerConnection(peerObserver : Observer){
+        closeStreamerConnection()
+        streamerConnection = createPeerConnection(peerObserver)
     }
 
-    fun sendIceCandidate(candidate: IceCandidate){
-        addIceCandidate(candidate)
+     fun createOfferToStreamer(offerListener : (SessionDescription) -> Unit){
+        streamerConnection?.createOffer(object : MySdpObserver(){
+            override fun onCreateSuccess(sdp: SessionDescription?) {
+                super.onCreateSuccess(sdp)
+                sdp?.let{offerSdp ->
+                    setLocalDescription(streamerConnection, offerSdp)
+                    offerListener(offerSdp)
+                }
+                Log.d(TAG, "onCreateSuccess: Offer: ${sdp.toString()}")
+            }
+        }, mediaConstraints)
     }
 
-    fun closeWatchConnection(){
+    fun useAnswerFromStreamer(answerSdp: SessionDescription){
+        setRemoteDescription(streamerConnection, answerSdp)
+    }
+
+    fun addIceCandidateToStreamerConn(candidate: IceCandidate){
+        streamerConnection?.let {
+            it.addIceCandidate(candidate)
+        }
+    }
+
+    fun closeStreamerConnection(){
         try {
             streamerConnection?.close()
         }catch (e:Exception){
@@ -196,17 +227,4 @@ class WebrtcClient (
         }
     }
 
-    fun closeStreamConnections(){
-        try {
-            screenCapturer?.stopCapture()
-            screenCapturer?.dispose()
-            localStream?.dispose()
-            if (viewersConnections != null) {
-                for(peerConnection in viewersConnections)
-                    peerConnection?.close()
-            }
-        }catch (e:Exception) {
-            e.printStackTrace()
-        }
-    }
 }
