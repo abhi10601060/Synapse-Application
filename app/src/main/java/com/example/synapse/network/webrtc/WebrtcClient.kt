@@ -5,6 +5,7 @@ import android.content.Intent
 import android.media.projection.MediaProjection
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.SurfaceView
 import android.view.WindowManager
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
@@ -109,18 +110,10 @@ class WebrtcClient (
         }
     }
 
-    fun addIceCandidate(iceCandidate: IceCandidate){
-        streamerConnection?.addIceCandidate(iceCandidate)
-    }
-
-    fun sendIceCandidate(candidate: IceCandidate){
-        addIceCandidate(candidate)
-    }
-
-
     //******************************************************* For Streamer ************************************************88
 
-    fun startScreenCaptureStream(permissionIntent : Intent){
+    fun startScreenCaptureStream(permissionIntent : Intent, surface: SurfaceViewRenderer){
+        this.surfaceView = surface
         val displayMatrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.defaultDisplay.getMetrics(displayMatrics)
@@ -187,6 +180,12 @@ class WebrtcClient (
         }catch (e:Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun addIceCandidateToViewersConn(viewer : String, candidate: IceCandidate){
+        val viewerPeerConn = viewersConnections[viewer]
+        viewerPeerConn!!.addIceCandidate(candidate)
+        Log.d(TAG, "addIceCandidateToViewersConn: ${candidate.toString()}")
     }
 
     //******************************************************* For Viewer ************************************************88

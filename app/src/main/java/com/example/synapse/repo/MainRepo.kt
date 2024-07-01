@@ -1,5 +1,6 @@
 package com.example.synapse.repo
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import com.example.synapse.model.WebSocketMessage
@@ -14,6 +15,7 @@ import org.webrtc.IceCandidate
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
+import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
 class MainRepo @Inject constructor(
@@ -27,9 +29,19 @@ class MainRepo @Inject constructor(
     //********************************************** Web Socket Listeners *****************************************************
     private val TAG = "MAIN_REPO"
 
+    private lateinit var permissionIntent : Intent
+    private lateinit var surfaceViewRenderer: SurfaceViewRenderer
+    private var isStreamer = false
+
     override fun onSocketOpen() {
         Log.d(TAG, "onSocketOpen: ")
-        // TODO: Start the peer connection process from the viewer Side
+        // TODO: Start the peer connection process from the viewer Side or streamer side
+        if (isStreamer){
+            webrtcClient.startScreenCaptureStream(permissionIntent, surfaceViewRenderer)
+        }
+        else{
+            createViewerSidePeerConnection("streamer_name")
+        }
     }
 
     override fun onSocketMessage(message: String) {
@@ -74,12 +86,15 @@ class MainRepo @Inject constructor(
         Log.d(TAG, "onSocketClosed: ")
     }
 
+
 // ****************************************************** For Streamer **********************************************8
 
 
-    suspend fun startStream(){
+    suspend fun startStream(permissionIntent : Intent, surfaceViewRenderer: SurfaceViewRenderer){
+        this.permissionIntent = permissionIntent
+        this.surfaceViewRenderer = surfaceViewRenderer
         val token = sharedPreferences.getString("token", null)
-        socketClient.createStreamConnection(token!!, this)
+        socketClient.createStreamerConnectionToStartStream(token!!, this)
     }
 
     private fun getStreamerSidePeerObserver(viewer :String) : MyPeerObserver{
@@ -87,8 +102,9 @@ class MainRepo @Inject constructor(
             override fun onIceCandidate(p0: IceCandidate?) {
                 super.onIceCandidate(p0)
                 p0?.let {
-//                    webrtcClient.sendIceCandidate(user,it)
+                    webrtcClient.addIceCandidateToViewersConn(viewer, p0)
                 }
+                Log.d(TAG, "onIceCandidate: $viewer : ${p0.toString()}")
             }
 
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
@@ -108,15 +124,15 @@ class MainRepo @Inject constructor(
     }
 
 
-
 // ****************************************************** For Viewer **************************************************************
+
 
     suspend fun watchStream(streamId : String){
         val token = sharedPreferences.getString("token", null)
         socketClient.createWsConnForViewer(streamId, token!!, this)
     }
 
-    fun createViewerSidePeerConnection(streamer: String){
+    private fun createViewerSidePeerConnection(streamer: String){
         webrtcClient.createViewerToStreamerConnection(getViewerSidePeerObserver("streamerName"))
         webrtcClient.createOfferToStreamer{ offerSdp ->
             val wsMessage = WebSocketMessage(

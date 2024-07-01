@@ -15,7 +15,7 @@ class SocketClient {
     private var webSocket : WebSocket? = null
     val okHttpClient = OkHttpClient()
 
-    fun createStreamConnection(token : String, listener : SocketListener){
+    fun createStreamerConnectionToStartStream(token : String, listener : SocketListener){
         val streamUrl = "what ever url"
         val request = Request.Builder()
             .addHeader("Authentication-Token", token)
