@@ -90,11 +90,12 @@ class MainRepo @Inject constructor(
 // ****************************************************** For Streamer **********************************************8
 
 
-    suspend fun startStream(permissionIntent : Intent, surfaceViewRenderer: SurfaceViewRenderer){
+   fun startStream(permissionIntent : Intent, surfaceViewRenderer: SurfaceViewRenderer){
         this.permissionIntent = permissionIntent
         this.surfaceViewRenderer = surfaceViewRenderer
-        val token = sharedPreferences.getString("token", null)
-        socketClient.createStreamerConnectionToStartStream(token!!, this)
+        val token = sharedPreferences.getString("token", "hi")
+       webrtcClient.startScreenCaptureStream(permissionIntent, surfaceViewRenderer)
+//        socketClient.createStreamerConnectionToStartStream(token!!, this)
     }
 
     private fun getStreamerSidePeerObserver(viewer :String) : MyPeerObserver{
@@ -121,6 +122,11 @@ class MainRepo @Inject constructor(
 //                p0?.let { listener?.onRemoteStreamAdded(it) }
             }
         }
+    }
+
+    fun closeStream(){
+//        socketClient.onDestroy()
+//        webrtcClient.onDestroy()
     }
 
 
@@ -168,6 +174,11 @@ class MainRepo @Inject constructor(
 //                p0?.let { listener?.onRemoteStreamAdded(it) }
             }
         }
+    }
+
+    fun leaveStream(){
+//        socketClient.onDestroy()
+//        webrtcClient.onDestroy()
     }
 
 }
