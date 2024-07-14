@@ -4,4 +4,5 @@ interface SocketListener {
     fun onSocketMessage(message : String)
     fun onSocketOpen()
     fun onSocketClosed()
+    fun onFailure()
 }

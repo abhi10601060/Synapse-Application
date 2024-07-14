@@ -7,6 +7,8 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import java.util.LinkedList
+import java.util.Queue
 import javax.inject.Singleton
 
 @Singleton
@@ -16,23 +18,34 @@ class SocketClient {
     val okHttpClient = OkHttpClient()
 
     fun createStreamerConnectionToStartStream(token : String, listener : SocketListener){
-        val streamUrl = "what ever url"
+        val streamUrl = "ws://ec2-65-0-127-171.ap-south-1.compute.amazonaws.com:8010/stream/start"
         val request = Request.Builder()
             .addHeader("Authentication-Token", token)
             .url(streamUrl)
             .build()
-        webSocket?.close(1000, "already exist...switching")
+//        webSocket?.close(1000, "already exist...switching")
+
+        webSocket = okHttpClient.newWebSocket(request, getWebSocketListener(listener))
+    }
+
+    fun reviveStreamerConnection(streamPid :String, token: String, listener: SocketListener){
+        val streamUrl = "ws://ec2-65-0-127-171.ap-south-1.compute.amazonaws.com:8010/stream/start/revive/$streamPid"
+        val request = Request.Builder()
+            .addHeader("Authentication-Token", token)
+            .url(streamUrl)
+            .build()
+//        webSocket?.close(1000, "already exist...switching")
 
         webSocket = okHttpClient.newWebSocket(request, getWebSocketListener(listener))
     }
 
     fun createWsConnForViewer(streamId : String, token : String, listener : SocketListener){
-        var watchUrl = "what ever url$streamId"
+        var watchUrl = "ws://ec2-65-0-127-171.ap-south-1.compute.amazonaws.com:8010/stream/join/$streamId"
         val request = Request.Builder()
             .addHeader("Authentication-Token", token)
             .url(watchUrl)
             .build()
-        webSocket?.close(1000, "already exist...switching")
+//        webSocket?.close(1000, "already exist...switching")
 
         webSocket = okHttpClient.newWebSocket(request, getWebSocketListener(listener))
     }
@@ -61,12 +74,12 @@ class SocketClient {
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 super.onFailure(webSocket, t, response)
-                Log.d(TAG, "onFailure: ")
+                Log.d(TAG, "onFailure: ${response?.message}")
+                listener.onFailure()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
-                Log.d(TAG, "onMessage:  $text")
                 listener.onSocketMessage(text)
             }
 
@@ -83,10 +96,17 @@ class SocketClient {
         }
     }
 
+    val q : Queue<String> = LinkedList<String>()
     fun sendMessage(message : String){
-        val res = webSocket?.send(message)
-        if (res == null || !res){
-            Log.d(TAG, "sendMessage: message could not sent : $message")
+        if (!message.equals("1")) q.offer(message)
+        while (!q.isEmpty()){
+            val res = webSocket?.send(message)
+            if (res == null || !res){
+                Log.d(TAG, "sendMessage: message could not sent : $message")
+                return
+            }
+            q.poll()
         }
+        Log.d(TAG, "sendMessage: Queue is empty...")
     }
 }

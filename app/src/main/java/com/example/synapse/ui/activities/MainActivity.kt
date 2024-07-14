@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -21,18 +22,22 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
 import com.example.synapse.R
 import com.example.synapse.model.DITest
 import com.example.synapse.repo.MainRepo
+import com.example.synapse.repo.PeerConnectionListener
 import com.example.synapse.services.ScreenCaptureService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
+import org.webrtc.MediaStream
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
@@ -41,7 +46,7 @@ import org.webrtc.VideoCapturer
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PeerConnectionListener {
 
     @Inject lateinit var  diTest : DITest
     @Inject lateinit var mainRepo: MainRepo
@@ -49,6 +54,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var startButton : Button
     private lateinit var stopButton : Button
+    private lateinit var fetchButton : Button
+    private lateinit var streamButton : Button
+    private lateinit var streamEdt : EditText
     private lateinit var surfaceView : SurfaceViewRenderer
 
     @SuppressLint("MissingInflatedId")
@@ -64,7 +72,6 @@ class MainActivity : AppCompatActivity() {
 
         createView()
 
-
         ScreenCaptureService.surfaceViewRenderer = surfaceView
         askPermission()
 
@@ -74,6 +81,25 @@ class MainActivity : AppCompatActivity() {
 
         stopButton.setOnClickListener(View.OnClickListener {
             stopStream()
+        })
+
+        fetchButton.setOnClickListener(View.OnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                mainRepo.getAllStreams()
+            }
+        })
+
+        streamButton.setOnClickListener(View.OnClickListener {
+            val streamId = streamEdt.text.toString()
+            val streamer = streamButton.tag
+            mainRepo.watchStream(streamId, this)
+        })
+
+        mainRepo.streams.observe(this, Observer {
+            for (stream in it){
+                streamButton.text = stream.id
+                streamButton.tag = stream.streamer
+            }
         })
     }
 
@@ -128,6 +154,20 @@ class MainActivity : AppCompatActivity() {
     private fun createView() {
         startButton = findViewById(R.id.start_stream)
         stopButton = findViewById(R.id.stop_stream)
+        fetchButton = findViewById(R.id.fetch_streams)
+        streamButton = findViewById(R.id.stream_button)
+        streamEdt = findViewById(R.id.stream_edt)
         surfaceView = findViewById(R.id.surfaceViewRenderer)
+    }
+
+    override fun onConnected() {
+        Toast.makeText(this, "Connected with peerConnection", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onStreamAdded(stream: MediaStream) {
+        runOnUiThread{
+            Log.d("MainActivity", "onStreamAdded: stream received")
+            stream.videoTracks[0].addSink(surfaceView)
+        }
     }
 }

@@ -22,6 +22,8 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
+import java.util.LinkedList
+import java.util.Queue
 
 class WebrtcClient (
     private val context : Context
@@ -148,8 +150,8 @@ class WebrtcClient (
         peerConnection?.createAnswer(object : MySdpObserver(){
             override fun onCreateSuccess(sdp: SessionDescription?) {
                 super.onCreateSuccess(sdp)
-                setLocalDescription(peerConnection, sdp)
                 listener(sdp!!)
+                setLocalDescription(peerConnection, sdp)
             }
         }, mediaConstraints)
     }
@@ -158,8 +160,9 @@ class WebrtcClient (
         val peerConnection = createPeerConnection(peerConnObserver)
         setRemoteDescription(peerConnection, offerSdp)
         peerConnection?.addStream(localStream)
-        createAnswer(peerConnection, listener)
         viewersConnections[viewer] =  peerConnection
+        createAnswer(peerConnection, listener)
+
     }
 
     fun useOfferFromViewer(viewer :String, peerConnObserver : Observer , offer : SessionDescription, answerListener : (answer : SessionDescription) -> Unit){
@@ -184,7 +187,10 @@ class WebrtcClient (
 
     fun addIceCandidateToViewersConn(viewer : String, candidate: IceCandidate){
         val viewerPeerConn = viewersConnections[viewer]
-        viewerPeerConn!!.addIceCandidate(candidate)
+        viewerPeerConn?.let {
+            val res = it.addIceCandidate(candidate)
+            Log.d(TAG, "addIceCandidateToViewersConn: iceCandidate added to $viewer + $res")
+        }
         Log.d(TAG, "addIceCandidateToViewersConn: ${candidate.toString()}")
     }
 
@@ -194,13 +200,14 @@ class WebrtcClient (
         closeStreamerConnection()
         streamerConnection = createPeerConnection(peerObserver)
     }
-
+    private lateinit var globalOfferSdp: SessionDescription
      fun createOfferToStreamer(offerListener : (SessionDescription) -> Unit){
         streamerConnection?.createOffer(object : MySdpObserver(){
             override fun onCreateSuccess(sdp: SessionDescription?) {
                 super.onCreateSuccess(sdp)
                 sdp?.let{offerSdp ->
-                    setLocalDescription(streamerConnection, offerSdp)
+//                    setLocalDescription(streamerConnection, offerSdp)
+                    globalOfferSdp = offerSdp
                     offerListener(offerSdp)
                 }
                 Log.d(TAG, "onCreateSuccess: Offer: ${sdp.toString()}")
@@ -209,18 +216,37 @@ class WebrtcClient (
     }
 
     fun useAnswerFromStreamer(answerSdp: SessionDescription){
+        setLocalDescription(streamerConnection, globalOfferSdp)
         setRemoteDescription(streamerConnection, answerSdp)
     }
 
-    fun addIceCandidateToStreamerConn(candidate: IceCandidate){
-        streamerConnection?.let {
-            it.addIceCandidate(candidate)
+//    val q :Queue<IceCandidate> = LinkedList()
+    fun addIceCandidateToStreamerConn(candidate: IceCandidate?){
+//        if (candidate != null) q.offer(candidate)
+//        if (streamerConnection?.remoteDescription != null){
+//            while (!q.isEmpty()){
+//                val cand = q.poll()
+//                streamerConnection?.let {
+//                    val success = it.addIceCandidate(cand)
+//                    Log.d(TAG, "addIceCandidateToStreamerConn: $cand + $success")
+//                }
+//            }
+//        }
+
+        if (streamerConnection?.localDescription == null){
+            setLocalDescription(streamerConnection, globalOfferSdp)
         }
+        streamerConnection?.let {
+            val success = it.addIceCandidate(candidate)
+            Log.d(TAG, "addIceCandidateToStreamerConn: $candidate + $success")
+        }
+
     }
 
     fun closeStreamerConnection(){
         try {
             streamerConnection?.close()
+            Log.d(TAG, "closeStreamerConnection: closed")
         }catch (e:Exception){
             e.printStackTrace()
         }
