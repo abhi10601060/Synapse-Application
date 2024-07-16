@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
+    //livekit
+    implementation (libs.livekit.android)
+
 }
 
 kapt {
