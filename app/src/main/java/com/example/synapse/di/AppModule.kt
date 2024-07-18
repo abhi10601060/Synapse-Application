@@ -16,4 +16,5 @@ class AppModule {
     fun getDiTestModel() : DITest{
         return DITest("test for di")
     }
+
 }
