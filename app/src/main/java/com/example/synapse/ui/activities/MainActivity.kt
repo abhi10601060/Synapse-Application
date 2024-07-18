@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var closeBtn : Button
     private lateinit var sendBtn : Button
     private lateinit var chatBox : EditText
+    private lateinit var castBtn : Button
 
     //liveKit related
     private lateinit var room : Room
@@ -79,7 +80,7 @@ class MainActivity : AppCompatActivity() {
 
         startBtn.setOnClickListener(View.OnClickListener {
             lifecycleScope.launch {
-                startStream()
+                startStream(false)
             }
         })
 
@@ -92,9 +93,13 @@ class MainActivity : AppCompatActivity() {
                 watchStream()
             }
         })
+
+        castBtn.setOnClickListener(View.OnClickListener {
+            askMediaProjectionPermission()
+        })
     }
 
-    private suspend fun startStream(){
+    private suspend fun startStream(isMediaProjection : Boolean, mediaPermissionIntent: Intent? = null){
         lifecycleScope.launch {
             room.events.collect {event ->
                 when(event){
@@ -120,12 +125,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         room.connect(WS_URL, STREAMER_TOKEN)
+        streamer = room.localParticipant
 
-         streamer = room.localParticipant
-        streamer.setCameraEnabled(true)
-        streamer.setMicrophoneEnabled(true)
-//        askMediaProjectionPermission()
-
+        if (!isMediaProjection){
+            streamer.setCameraEnabled(true)
+            streamer.setMicrophoneEnabled(true)
+        }
+        else {
+            streamer.setScreenShareEnabled(true, mediaPermissionIntent)
+        }
 
         while (true){
             if (streamer.videoTrackPublications.size>0){
@@ -154,7 +162,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1){
             Log.d("LiveKit", "onActivityResult: mediaprojection intent received")
             lifecycleScope.launch {
-                streamer.setScreenShareEnabled(true, data)
+                startStream(true, data)
             }
         }
     }
@@ -211,6 +219,7 @@ class MainActivity : AppCompatActivity() {
         startBtn = findViewById(R.id.start_btn)
         joinBtn = findViewById(R.id.join_btn)
         chatBox = findViewById(R.id.chat_box)
+        castBtn = findViewById(R.id.cast_btn)
 
         surfaceViewRenderer = findViewById(R.id.stream_surface)
     }

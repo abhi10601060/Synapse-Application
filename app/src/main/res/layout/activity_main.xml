@@ -18,7 +18,6 @@
             android:layout_gravity="center"
             />
 
-
     </FrameLayout>
 
 
@@ -81,6 +80,15 @@
             android:text="send"
             android:layout_centerHorizontal="true"
             />
+
+        <Button
+            android:id="@+id/cast_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="cast"
+            android:layout_toRightOf="@id/send_btn"
+            android:layout_below="@id/chat_box"
+            android:layout_marginStart="10dp"/>
     </RelativeLayout>
 
 </RelativeLayout>
