@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sendBtn : Button
     private lateinit var chatBox : EditText
     private lateinit var castBtn : Button
+    private lateinit var receivedMessage : TextView
 
     //liveKit related
     private lateinit var room : Room
@@ -97,6 +98,15 @@ class MainActivity : AppCompatActivity() {
         castBtn.setOnClickListener(View.OnClickListener {
             askMediaProjectionPermission()
         })
+
+        sendBtn.setOnClickListener(View.OnClickListener {
+            val text = chatBox.text.toString()
+            if (!text.isNullOrBlank()){
+                lifecycleScope.launch {
+                    streamer.publishData(text.toByteArray())
+                }
+            }
+        })
     }
 
     private suspend fun startStream(isMediaProjection : Boolean, mediaPermissionIntent: Intent? = null){
@@ -117,9 +127,17 @@ class MainActivity : AppCompatActivity() {
                             Log.d("LiveKit", "onTrack : track is not videoTrack")
                         }
                     }
+                    is RoomEvent.DataReceived ->{
+                        var text = receivedMessage.text
+                        var message =  String(event.data)
+                        Log.d("LiveKit", "startStream: data: ${event.data} and string: message")
+                        receivedMessage.text = text.toString() + message
+                    }
                     else -> {
                         Log.d("LiveKit", "startStream: else block")
                     }
+
+
                 }
             }
         }
@@ -147,9 +165,6 @@ class MainActivity : AppCompatActivity() {
                 break
             }
         }
-
-
-
     }
 
     private fun askMediaProjectionPermission() {
@@ -220,6 +235,7 @@ class MainActivity : AppCompatActivity() {
         joinBtn = findViewById(R.id.join_btn)
         chatBox = findViewById(R.id.chat_box)
         castBtn = findViewById(R.id.cast_btn)
+        receivedMessage = findViewById(R.id.received_msg)
 
         surfaceViewRenderer = findViewById(R.id.stream_surface)
     }
