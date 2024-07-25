@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/mainMenuHome">
+
+    <fragment
+        android:id="@+id/mainMenuHome"
+        android:name="com.example.synapse.ui.fragments.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/mainMenuProfile"
+        android:name="com.example.synapse.ui.fragments.ProfileFragment"
+        android:label="ProfileFragment" />
+    <fragment
+        android:id="@+id/mainMenuStart"
+        android:name="com.example.synapse.ui.fragments.StartStreamFragment"
+        android:label="StartStreamFragment" />
+    <fragment
+        android:id="@+id/mainMenuSubs"
+        android:name="com.example.synapse.ui.fragments.SubscriptionFragment"
+        android:label="SubscriptionFragment" />
+</navigation>

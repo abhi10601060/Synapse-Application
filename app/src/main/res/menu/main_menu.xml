@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/mainMenuHome"
+        app:showAsAction="always"
+        android:icon="@drawable/synapsehome"
+        android:title="" />
+
+    <item android:id="@+id/mainMenuSubs"
+        app:showAsAction="always"
+        android:icon="@drawable/synapsesubs"
+        android:title="" />
+
+    <item android:id="@+id/mainMenuStart"
+        app:showAsAction="always"
+        android:icon="@drawable/synapsestartstream"
+        android:title=""
+        />
+
+    <item android:id="@+id/mainMenuProfile"
+        app:showAsAction="always"
+        android:icon="@drawable/synapseprofile"
+        android:title="" />
+</menu>

@@ -9,42 +9,33 @@
     android:background="@color/backgroundBlack"
     >
 
-    <RelativeLayout
-        android:id="@+id/homeCustomToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="60dp">
-
-        <ImageView
-            android:id="@+id/homeFullLogoImg"
-            android:layout_width="wrap_content"
-            android:layout_marginStart="30dp"
-            android:scaleY="2"
-            android:scaleX="2"
-            android:layout_height="match_parent"
-            android:src="@mipmap/synapse_full_logo"
-            />
-
-        <ImageView
-            android:id="@+id/homeNotificationImg"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@mipmap/notification_logo"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="15dp"
-            android:layout_centerVertical="true"/>
-
-    </RelativeLayout>
-
     <FrameLayout
+        android:id="@+id/mainNavFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/mainBottomBar"/>
+        android:layout_above="@id/mainBottomBar">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/mainNavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/main_nav_graph"
+            />
+
+    </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/mainBottomBar"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/backgroundBlack"/>
+        android:background="@color/backgroundBlack"
+        app:itemIconSize="34dp"
+        app:itemIconTint="@drawable/bottom_nav_color_selector"
+        app:labelVisibilityMode="unlabeled"
+        style="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface"
+        app:menu="@menu/main_menu"/>
 
 </RelativeLayout>
