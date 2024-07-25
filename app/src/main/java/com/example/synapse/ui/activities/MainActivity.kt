@@ -28,8 +28,5 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val text = findViewById<TextView>(R.id.main_text)
-        text.text = diTest.message
-
     }
 }
