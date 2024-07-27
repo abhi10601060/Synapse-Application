@@ -1,19 +1,60 @@
 package com.example.synapse.di
 
+import android.content.Context
+import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.DITest
+import com.example.synapse.network.SynapseService
+import com.example.synapse.repo.StreamRepo
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-
     @Provides
     @Singleton
     fun getDiTestModel() : DITest{
         return DITest("test for di")
+    }
+
+    @Provides
+    @Singleton
+    fun getGson() : Gson {
+        return Gson()
+    }
+
+    @Provides
+    @Singleton
+    fun getRetroInstance() : Retrofit{
+        val url = "http://synapse.com/"
+        return Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun getSynapseService(retrofit : Retrofit) : SynapseService{
+        return retrofit.create(SynapseService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun getSharedPrefUtil(@ApplicationContext context: Context) : SharedprefUtil{
+        return SharedprefUtil(context)
+    }
+
+    @Provides
+    @Singleton
+    fun getStreamRepository(synapseService: SynapseService, gson: Gson, sharedprefUtil: SharedprefUtil) : StreamRepo{
+        return StreamRepo(synapseService, gson, sharedprefUtil)
     }
 }
