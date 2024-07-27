@@ -4,14 +4,71 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundBlack">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Stream"
-        android:textColor="@color/white"
-        android:textSize="40sp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"/>
+    <RelativeLayout
+        android:id="@+id/streamCustomToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+
+        <ImageView
+            android:id="@+id/streamFullLogoImg"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="30dp"
+            android:scaleY="2"
+            android:scaleX="2"
+            android:layout_height="match_parent"
+            android:src="@mipmap/synapse_full_logo"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/streamStartLiveParent"
+        android:layout_below="@+id/streamCustomToolbar"
+        android:layout_marginTop="100dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="@drawable/highlited_rect"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:id="@+id/streamStartLiveTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/inter"
+            android:textStyle="bold"
+            android:text="Start Live"
+            android:textColor="@color/white"
+            android:textSize="32dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/streamStartScreenCaptureParent"
+        android:layout_below="@+id/streamStartLiveParent"
+        android:layout_marginTop="100dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="@drawable/highlited_rect"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:id="@+id/streamStartScreenCaptureTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/inter"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:text="Start Screen\n Capture"
+            android:textColor="@color/white"
+            android:textSize="30dp" />
+
+    </RelativeLayout>
+
+
+
+
 
 
 </RelativeLayout>
