@@ -2,7 +2,7 @@ package com.example.synapse.model.res
 
 import com.google.gson.annotations.SerializedName
 
-data class Room(
+data class Stream(
     @SerializedName("sid")
     val sessionId : String,
     @SerializedName("name")

@@ -11,6 +11,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.livekit.android.LiveKit
+import io.livekit.android.room.Room
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -56,5 +58,11 @@ class AppModule {
     @Singleton
     fun getStreamRepository(synapseService: SynapseService, gson: Gson, sharedprefUtil: SharedprefUtil) : StreamRepo{
         return StreamRepo(synapseService, gson, sharedprefUtil)
+    }
+
+    @Provides
+    @Singleton
+    fun getLiveKitRoom(@ApplicationContext applicationContext: Context) : Room{
+        return LiveKit.create(applicationContext)
     }
 }

@@ -1,10 +1,10 @@
 package com.example.synapse.network
 
-import com.example.synapse.model.req.CloseStreamInput
+import com.example.synapse.model.req.StopStreamInput
 import com.example.synapse.model.req.StartStreamInput
-import com.example.synapse.model.res.JoinRoomOutput
-import com.example.synapse.model.res.AllActiveRoomsOutput
-import com.example.synapse.model.res.CloseStreamOutput
+import com.example.synapse.model.res.JoinStreamOutput
+import com.example.synapse.model.res.AllActiveStreamOutput
+import com.example.synapse.model.res.StopStreamOutput
 import com.example.synapse.model.res.StartStreamOutput
 import retrofit2.Response
 import retrofit2.http.Body
@@ -28,20 +28,20 @@ interface SynapseService {
     suspend fun joinStream(
         @Header("Authentication-Token") token: String,
         @Path("room_name") roomName : String
-    ) : Response<JoinRoomOutput>
+    ) : Response<JoinStreamOutput>
 
     @POST("stream/stop")
     @Headers("Accept: application/json", "Content-Type: application/json")
-    suspend fun closeStream(
+    suspend fun stopStream(
         @Header("Authentication-Token") token: String,
-        @Body closeStreamInput: CloseStreamInput
-    ) : Response<CloseStreamOutput>
+        @Body stopStreamInput: StopStreamInput
+    ) : Response<StopStreamOutput>
 
 
     @GET("stream/all")
     @Headers("Accept: application/json", "Content-Type: application/json")
     suspend fun getAllActiveStreams(
         @Header("Authentication-Token") token: String
-    ) : Response<AllActiveRoomsOutput>
+    ) : Response<AllActiveStreamOutput>
 
 }
