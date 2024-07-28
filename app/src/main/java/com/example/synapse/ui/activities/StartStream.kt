@@ -34,7 +34,7 @@ class StartStream : AppCompatActivity() {
         dest?.let {
             when(it){
                 IntentValue.START_STREAM_LIVE ->{
-                    navController.navigate(R.id.action_screenCaptureFragment_to_livePreviewFragment)
+                    navController.navigate(R.id.action_screenCaptureDetailsFragment_to_livePreviewFragment)
 
                 }
                 IntentValue.START_STREAM_SCREEN_CAPTURE ->{

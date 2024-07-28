@@ -2,18 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/start_stream_nav_graph"
-    app:startDestination="@id/screenCaptureFragment"
+    app:startDestination="@id/screenCaptureDetailsFragment"
     >
     <fragment
         android:id="@+id/screenCaptureFragment"
         android:name="com.example.synapse.ui.fragments.startstream.ScreenCaptureFragment"
-        android:label="ScreenCaptureFragment" >
-        <action
-            android:id="@+id/action_screenCaptureFragment_to_livePreviewFragment"
-            app:destination="@id/livePreviewFragment"
-            app:popUpTo="@id/screenCaptureFragment"
-            app:popUpToInclusive="true"/>
-    </fragment>
+        android:label="ScreenCaptureFragment" />
     <fragment
         android:id="@+id/liveFragment"
         android:name="com.example.synapse.ui.fragments.startstream.LiveFragment"
@@ -28,4 +22,20 @@
             app:popUpTo="@id/livePreviewFragment"
             app:popUpToInclusive="true"/>
     </fragment>
+    <fragment
+        android:id="@+id/screenCaptureDetailsFragment"
+        android:name="com.example.synapse.ui.fragments.startstream.ScreenCaptureDetailsFragment"
+        android:label="ScreenCaptureDetailsFragment" >
+        <action
+            android:id="@+id/action_screenCaptureDetailsFragment_to_livePreviewFragment"
+            app:destination="@id/livePreviewFragment"
+            app:popUpTo="@id/screenCaptureDetailsFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_screenCaptureDetailsFragment_to_screenCaptureFragment"
+            app:destination="@id/screenCaptureFragment"
+            app:popUpTo="@id/screenCaptureDetailsFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
 </navigation>

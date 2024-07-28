@@ -36,9 +36,10 @@ const val STREAM_STATUS_CLOSE_ERROR = "clos_error"
 
 @HiltViewModel
 class StreamViewModel @Inject constructor(
-    private val streamRepo: StreamRepo,
-    private val liveKitRoom : Room
+    private val streamRepo: StreamRepo
 )  : ViewModel(){
+
+    private lateinit var liveKitRoom : Room
 
     private val TAG = "Stream ViewModel"
     private val WS_URL = "wss://synapse-wj7x7eni.livekit.cloud"
@@ -60,7 +61,11 @@ class StreamViewModel @Inject constructor(
 //    val startStreamOutput : StateFlow<Resource<StartStreamOutput>>
 //        get() = streamRepo.startStreamOutput
 
-    fun init(surfaceViewRenderer: SurfaceViewRenderer){
+    fun init(surfaceViewRenderer: SurfaceViewRenderer, room : Room?){
+        if (room != null) {
+            this.liveKitRoom = room
+            Log.d(TAG, "init: room is not null")
+        }
         this.surfaceViewRenderer = surfaceViewRenderer
         liveKitRoom.initVideoRenderer(surfaceViewRenderer)
         activateRoomEventListener()

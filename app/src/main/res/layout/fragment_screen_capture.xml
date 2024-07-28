@@ -43,7 +43,15 @@
         android:layout_below="@id/screenCaptureTopBar"
         android:layout_above="@+id/screenCaptureChatBoxParent"
         android:layout_marginTop="15dp"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        android:padding="4dp">
+
+        <io.livekit.android.renderer.SurfaceViewRenderer
+            android:id="@+id/stream_surface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
 
     </RelativeLayout>
 

@@ -59,10 +59,4 @@ class AppModule {
     fun getStreamRepository(synapseService: SynapseService, gson: Gson, sharedprefUtil: SharedprefUtil) : StreamRepo{
         return StreamRepo(synapseService, gson, sharedprefUtil)
     }
-
-    @Provides
-    @Singleton
-    fun getLiveKitRoom(@ApplicationContext applicationContext: Context) : Room{
-        return LiveKit.create(applicationContext)
-    }
 }
