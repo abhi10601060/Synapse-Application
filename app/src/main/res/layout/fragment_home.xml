@@ -30,4 +30,21 @@
 
     </RelativeLayout>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/homeCustomToolbar"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="@color/white"
+        style="@style/BasicText"
+        android:text="Refresh"
+        android:textColor="@color/black"
+        android:id="@+id/homeRefreshBtn"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/homeRefreshBtn"
+        android:id="@+id/activeStreamsRV"/>
+
 </RelativeLayout>
