@@ -27,12 +27,6 @@ const val STREAM_STATUS_LIVE_ERROR = "live_error"
 const val STREAM_STATUS_STOPPING = "stopping"
 const val STREAM_STATUS_STOPPED = "stopped"
 const val STREAM_STATUS_STOP_ERROR = "stop_error"
-const val STREAM_STATUS_LOADING = "loading"
-const val STREAM_STATUS_LOADED = "loaded"
-const val STREAM_STATUS_WATCH_ERROR = "watch_error"
-const val STREAM_STATUS_CLOSING = "closing"
-const val STREAM_STATUS_CLOSED = "closed"
-const val STREAM_STATUS_CLOSE_ERROR = "clos_error"
 
 @HiltViewModel
 class StreamViewModel @Inject constructor(
@@ -172,7 +166,7 @@ class StreamViewModel @Inject constructor(
                     }
 
                     else ->{
-                        Log.d("LiveKit - viewModel", "activateRoomEventListener: else block")
+                        Log.d("LiveKit - streamViewModel", "activateRoomEventListener: else block")
                     }
                 }
             }
@@ -195,14 +189,6 @@ class StreamViewModel @Inject constructor(
             _streamStatus.emit(STREAM_STATUS_STOPPING)
             streamRepo.stopStream()
         }
-    }
-
-    fun watchStream(){
-
-    }
-
-    fun closeStream(){
-
     }
 
     private suspend fun handleStreamer(isScreenCapture : Boolean) {

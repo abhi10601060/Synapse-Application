@@ -2,7 +2,7 @@ package com.example.synapse.network
 
 import com.example.synapse.model.req.StopStreamInput
 import com.example.synapse.model.req.StartStreamInput
-import com.example.synapse.model.res.JoinStreamOutput
+import com.example.synapse.model.res.WatchStreamOutput
 import com.example.synapse.model.res.AllActiveStreamOutput
 import com.example.synapse.model.res.StopStreamOutput
 import com.example.synapse.model.res.StartStreamOutput
@@ -28,7 +28,7 @@ interface SynapseService {
     suspend fun joinStream(
         @Header("Authentication-Token") token: String,
         @Path("room_name") roomName : String
-    ) : Response<JoinStreamOutput>
+    ) : Response<WatchStreamOutput>
 
     @POST("stream/stop")
     @Headers("Accept: application/json", "Content-Type: application/json")

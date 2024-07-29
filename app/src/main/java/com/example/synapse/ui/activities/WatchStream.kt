@@ -1,6 +1,7 @@
 package com.example.synapse.ui.activities
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,8 @@ import com.example.synapse.R
 import io.livekit.android.renderer.SurfaceViewRenderer
 
 class WatchStream : AppCompatActivity() {
+
+    val TAG = "WatchStreamActivity"
 
     private lateinit var surfaceViewRenderer: SurfaceViewRenderer
     private lateinit var chatEdt : EditText
@@ -24,6 +27,11 @@ class WatchStream : AppCompatActivity() {
             insets
         }
         createView()
+
+        intent?.let {
+            val streamName = it.getStringExtra("name")
+            Log.d(TAG, "onCreate: incoming stream is : $streamName")
+        }
     }
 
     private fun createView() {

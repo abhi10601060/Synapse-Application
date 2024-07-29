@@ -2,9 +2,9 @@ package com.example.synapse.model.res
 
 import com.google.gson.annotations.SerializedName
 
-data class JoinStreamOutput(
+data class WatchStreamOutput(
     @SerializedName("message")
     val message : String,
     @SerializedName("token")
-    val viewerRoomToken : String
+    val viewerRoomToken : String?
 )

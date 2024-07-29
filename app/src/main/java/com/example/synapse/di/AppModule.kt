@@ -6,6 +6,7 @@ import com.example.synapse.model.DITest
 import com.example.synapse.network.SynapseService
 import com.example.synapse.repo.MainRepo
 import com.example.synapse.repo.StreamRepo
+import com.example.synapse.repo.WatchStreamRepo
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -65,5 +66,11 @@ class AppModule {
     @Singleton
     fun getMainRepository(synapseService: SynapseService, gson: Gson, sharedprefUtil: SharedprefUtil) : MainRepo{
         return MainRepo(synapseService, sharedprefUtil, gson)
+    }
+
+    @Provides
+    @Singleton
+    fun getWatchStreamRepository(synapseService: SynapseService, sharedprefUtil: SharedprefUtil, gson: Gson) : WatchStreamRepo{
+        return WatchStreamRepo(synapseService, sharedprefUtil, gson)
     }
 }
