@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.DITest
 import com.example.synapse.network.SynapseService
+import com.example.synapse.repo.MainRepo
 import com.example.synapse.repo.StreamRepo
 import com.google.gson.Gson
 import dagger.Module
@@ -58,5 +59,11 @@ class AppModule {
     @Singleton
     fun getStreamRepository(synapseService: SynapseService, gson: Gson, sharedprefUtil: SharedprefUtil) : StreamRepo{
         return StreamRepo(synapseService, gson, sharedprefUtil)
+    }
+
+    @Provides
+    @Singleton
+    fun getMainRepository(synapseService: SynapseService, gson: Gson, sharedprefUtil: SharedprefUtil) : MainRepo{
+        return MainRepo(synapseService, sharedprefUtil, gson)
     }
 }

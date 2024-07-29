@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.activities.WatchStream"
+    android:background="@color/backgroundBlack">
+
+    <RelativeLayout
+        android:id="@+id/watchStreamParent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="20dp"
+        android:background="@drawable/highlited_rect"
+        android:layout_above="@+id/watchStreamChatBoxParent"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="20dp"
+        android:padding="4dp">
+
+        <io.livekit.android.renderer.SurfaceViewRenderer
+            android:id="@+id/watchStreamSurface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/watchStreamChatBoxParent"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/highlited_rect"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp">
+
+
+        <EditText
+            android:id="@+id/watchStreamChatEdt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/highlited_rect"
+            android:layout_margin="10dp"
+            android:hint="chat Here..."
+            android:textColorHint="@color/offWhite"
+            android:drawableEnd="@drawable/synapsesubs"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:paddingStart="10dp"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -113,37 +113,4 @@ class StreamRepo @Inject constructor(
         Log.d(TAG, "handleCloseStream: error in close stream body is null")
         return Resource.Error(message = "error in start stream body is null")
     }
-
-    suspend fun getAllActiveStreams(){
-        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-        if (token == null) {
-            Log.d("TAG", "startStream: token is Empty")
-            _stopStreamOutput.emit(Resource.Error(message = "token Invalid"))
-            return
-        }
-
-        val res = synapseService.getAllActiveStreams(token)
-        val resource = handleAllActiveStreams(res)
-        _allActiveStreams.emit(resource)
-
-        when(resource){
-            is Resource.Success ->{
-
-            }
-            is Resource.Error ->{
-
-            }
-            else ->{
-                Log.d(TAG, "allActiveStreams: Else block...")
-            }
-        }
-    }
-
-    private fun handleAllActiveStreams (res : Response<AllActiveStreamOutput>) : Resource<AllActiveStreamOutput>{
-        if (res.isSuccessful && res.body() != null){
-            return Resource.Success(data =  res.body()!!)
-        }
-        Log.d(TAG, "handleAllActiveStreams: error in all active streams body is null")
-        return Resource.Error(message = "error in all active streams body is null")
-    }
 }
