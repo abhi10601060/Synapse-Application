@@ -8,7 +8,7 @@
     tools:context=".ui.activities.WatchStream"
     android:background="@color/backgroundBlack">
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/watchStreamParent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,7 +17,8 @@
         android:layout_above="@+id/watchStreamChatBoxParent"
         android:layout_marginTop="15dp"
         android:layout_marginBottom="20dp"
-        android:padding="4dp">
+        android:padding="4dp"
+        >
 
         <io.livekit.android.renderer.SurfaceViewRenderer
             android:id="@+id/watchStreamSurface"
@@ -26,7 +27,7 @@
             android:layout_gravity="center"
             />
 
-    </RelativeLayout>
+    </FrameLayout>
 
     <RelativeLayout
         android:id="@+id/watchStreamChatBoxParent"
@@ -36,6 +37,14 @@
         android:background="@drawable/highlited_rect"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="10dp">
+
+
+        <Button
+            android:id="@+id/watchStreamBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="watch"
+            android:layout_centerHorizontal="true"/>
 
 
         <EditText

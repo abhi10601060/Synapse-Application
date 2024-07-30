@@ -23,9 +23,10 @@ class MainRepo @Inject constructor(
 
 
     suspend fun getAllActiveStreams(){
-        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
-            Log.d("TAG", "startStream: token is Empty")
+            Log.d("TAG", "FetchAllActive Streams: token is Empty")
             _activeStreams.emit(Resource.Error(message = "token Invalid"))
             return
         }

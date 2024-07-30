@@ -2,20 +2,35 @@ package com.example.synapse.ui.activities
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
+import com.example.synapse.viemodel.WatchStreamViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import io.livekit.android.LiveKit
 import io.livekit.android.renderer.SurfaceViewRenderer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class WatchStream : AppCompatActivity() {
 
     val TAG = "WatchStreamActivity"
 
+    private val watchStreamViewModel : WatchStreamViewModel by viewModels()
+
     private lateinit var surfaceViewRenderer: SurfaceViewRenderer
+    private lateinit var watchStreamBtn : Button
     private lateinit var chatEdt : EditText
+    private lateinit var streamName : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,15 +42,28 @@ class WatchStream : AppCompatActivity() {
             insets
         }
         createView()
+        setOnClicks()
+        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
 
         intent?.let {
-            val streamName = it.getStringExtra("name")
+            streamName = it.getStringExtra("name").toString()
             Log.d(TAG, "onCreate: incoming stream is : $streamName")
+//            lifecycleScope.launch(Dispatchers.Main) {
+//                delay(2000)
+//                watchStreamViewModel.watchStream(streamName!!)
+//            }
         }
+    }
+
+    private fun setOnClicks() {
+        watchStreamBtn.setOnClickListener(View.OnClickListener {
+            watchStreamViewModel.watchStream(streamName)
+        })
     }
 
     private fun createView() {
         surfaceViewRenderer = findViewById(R.id.watchStreamSurface)
         chatEdt = findViewById(R.id.watchStreamChatEdt)
+        watchStreamBtn = findViewById(R.id.watchStreamBtn)
     }
 }

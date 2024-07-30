@@ -43,9 +43,12 @@ class WatchStreamViewModel @Inject constructor(
     val streamStatus : StateFlow<String>
         get() = _streamStatus
 
-    fun init(surfaceViewRenderer: SurfaceViewRenderer, livekitRoom : Room){
+    fun init(surfaceViewRenderer: SurfaceViewRenderer, room : Room?){
         this.surfaceViewRenderer = surfaceViewRenderer
-        this.liveKitRoom = livekitRoom
+        if (room != null) {
+            this.liveKitRoom = room
+        }
+        liveKitRoom.initVideoRenderer(surfaceViewRenderer)
         activateWatchStreamCallListener()
         activateRoomEventListener()
     }
@@ -61,11 +64,12 @@ class WatchStreamViewModel @Inject constructor(
                             val viewerToken = startStreamOutput.viewerRoomToken
                             if (viewerToken != null) {
                                 liveKitRoom.connect(WS_URL, viewerToken)
-
                             }
-                            Log.d(TAG, "watchStream: returned Stream Token is null")
+                            else{
+                                Log.d(TAG, "watchStream: returned Stream Token is null")
+                            }
                         }
-                        Log.d(TAG, "watchStream: returned Stream output is null")
+                        if (it.data == null) Log.d(TAG, "watchStream: returned Stream output is null")
                     }
                     is Resource.Loading ->{
                         Log.d(TAG, "watchStream: watchStreamOutput is Loading")
@@ -97,8 +101,14 @@ class WatchStreamViewModel @Inject constructor(
                         val track = event.track
                         if (track is VideoTrack){
                             Log.d(TAG, "onTrack : track is videoTrack")
-                            attachVideo(track)
-                            _streamStatus.emit(STREAM_STATUS_LOADED)
+                            launch(Dispatchers.Main) {
+                                attachVideo(track)
+                                val height = event.publication.dimensions?.height
+                                val width = event.publication.dimensions?.width
+
+                                Log.d("Livekit", "Remote stream startStream: height : $height and width : $width")
+//                                _streamStatus.emit(STREAM_STATUS_LOADED)
+                            }
                         }
                         else{
                             Log.d(TAG, "onTrack : track is not videoTrack")
@@ -148,6 +158,7 @@ class WatchStreamViewModel @Inject constructor(
     }
 
     fun attachVideo(track : VideoTrack){
+        Log.d(TAG, "attachVideo: called for watch video")
         surfaceViewRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
         track.addRenderer(surfaceViewRenderer)
     }

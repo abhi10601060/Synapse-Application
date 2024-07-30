@@ -37,7 +37,7 @@ class AppModule {
     @Provides
     @Singleton
     fun getRetroInstance() : Retrofit{
-        val url = "http://synapse.com/"
+        val url = "http://ec2-15-207-247-48.ap-south-1.compute.amazonaws.com:8010/"
         return Retrofit.Builder()
             .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())

@@ -47,12 +47,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
              mainViewModel.allActiveStreams.collect{
                  when(it) {
                      is Resource.Success ->{
-                         val allStreams = it.data!!.streams
-                         val adapter = ActiveStreamsAdapter(this@HomeFragment)
-                         adapter.submitList(allStreams)
-                         activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-                         activeStreamsRV.adapter = adapter
-                         Log.d(TAG, "observeActiveStreams: active streams : $allStreams")
+                         launch(Dispatchers.Main) {
+                             val allStreams = it.data!!.streams
+                             val adapter = ActiveStreamsAdapter(this@HomeFragment)
+                             adapter.submitList(allStreams)
+                             activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                             activeStreamsRV.adapter = adapter
+                             Log.d(TAG, "observeActiveStreams: active streams : $allStreams")
+                         }
                      }
 
                      is Resource.Loading ->{

@@ -1,6 +1,7 @@
 package com.example.synapse.viemodel
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,6 +43,8 @@ class StreamViewModel @Inject constructor(
     @SuppressLint("StaticFieldLeak")
     private lateinit var surfaceViewRenderer : SurfaceViewRenderer
     private lateinit var streamer : LocalParticipant
+    private var isScreenCaptureRequest = true
+    private var mediaProjectionIntent : Intent? = null
 
     private val _streamStatus = MutableStateFlow<String>(STREAM_STATUS_IDLE)
     val streamStatus : StateFlow<String>
@@ -77,12 +80,16 @@ class StreamViewModel @Inject constructor(
                         it.data?.let {startStreamOutput ->
                             val streamerToken = startStreamOutput.streamerRoomToken
                             if (streamerToken != null) {
-                                liveKitRoom.connect(WS_URL, streamerToken)
-                                handleStreamer(isScreenCapture = true)
+                                launch(Dispatchers.Main) {
+                                    liveKitRoom.connect(WS_URL, streamerToken)
+                                    handleStreamer()
+                                }
                             }
-                            Log.d(TAG, "startScreenCapture: returned Stream Token is null")
+                            else{
+                                Log.d(TAG, "startScreenCapture: returned Stream Token is null")
+                            }
                         }
-                        Log.d(TAG, "startScreenCapture: returned Stream output is null")
+                        if (it.data == null) Log.d(TAG, "startScreenCapture: returned Stream output is null")
                     }
                     is Resource.Loading ->{
                         Log.d(TAG, "startScreenCapture: startStreamOutput is Loading")
@@ -177,7 +184,9 @@ class StreamViewModel @Inject constructor(
 
     }
 
-    fun startScreenCapture(roomName : String){
+    fun startScreenCapture(roomName : String, mediaProjectionIntent: Intent?){
+        this.isScreenCaptureRequest = true
+        this.mediaProjectionIntent = mediaProjectionIntent
         viewModelScope.launch(Dispatchers.IO) {
             _streamStatus.emit(STREAM_STATUS_GOING_LIVE)
             streamRepo.startStream(roomName)
@@ -191,11 +200,11 @@ class StreamViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleStreamer(isScreenCapture : Boolean) {
+    private suspend fun handleStreamer() {
         streamer = liveKitRoom.localParticipant
 
-        if (isScreenCapture){
-            streamer.setScreenShareEnabled(true)
+        if (isScreenCaptureRequest){
+            streamer.setScreenShareEnabled(true, mediaProjectionIntent)
         }
         else{
             streamer.setCameraEnabled(true)

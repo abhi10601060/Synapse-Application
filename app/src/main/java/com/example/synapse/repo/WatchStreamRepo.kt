@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Response
 import javax.inject.Inject
 
+const val DUMMY_VIEWER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6InNodWJoYW0iLCJleHAiOjE3MjM4NTI3NzB9.nBatlO1vWy-yfhkE_4NpR3iCuwyvBm-uR93W8BLwsEQ"
+
 class WatchStreamRepo @Inject constructor(
     private val synapseService: SynapseService,
     private val sharedprefUtil: SharedprefUtil,
@@ -24,7 +26,8 @@ class WatchStreamRepo @Inject constructor(
 
     suspend fun watchStream(streamName : String){
         _watchStreamOutput.emit(Resource.Loading())
-        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))

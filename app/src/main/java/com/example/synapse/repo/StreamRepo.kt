@@ -19,6 +19,8 @@ const val TAG = "StreamRepo"
 
 const val STREAM_TOKEN_STATUS_IDLE = "idle"
 const val STREAM_TOKEN_STATUS_CREATED = "created"
+const val DUMMY_STREAMER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IkFiaGkiLCJleHAiOjE3MjM4NTI4MDZ9.0ZkGhdsZhS_0HKzg_qWmzlsUKTkCVJlPP_olOk9vlco"
+
 
 class StreamRepo @Inject constructor(
     private val synapseService: SynapseService,
@@ -43,7 +45,8 @@ class StreamRepo @Inject constructor(
 
     suspend fun startStream(roomName : String){
         _startStreamOutput.emit(Resource.Loading())
-        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        token = DUMMY_STREAMER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _startStreamOutput.emit(Resource.Error(message = "token Invalid"))
@@ -78,7 +81,8 @@ class StreamRepo @Inject constructor(
 
     suspend fun stopStream(){
         _stopStreamOutput.emit(Resource.Loading())
-        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        token = DUMMY_STREAMER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _stopStreamOutput.emit(Resource.Error(message = "token Invalid"))
