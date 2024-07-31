@@ -4,13 +4,82 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundBlack">
 
-    <TextView
-        android:id="@+id/liveText"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/liveTopBar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="32dp"
-        style="@style/BasicText"
-        android:text="Fargment Live"
-        android:layout_centerInParent="true"/>
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/BasicText"
+            android:text="You are Live"
+            android:textSize="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"/>
+
+        <Button
+            android:id="@+id/liveStopStreamBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:text="Stop Stream"
+            android:textSize="10dp"
+            android:padding="1dp"
+            android:backgroundTint="@color/white"
+            android:textColor="@color/black"/>
+
+
+    </RelativeLayout>
+
+
+    <FrameLayout
+        android:id="@+id/livePreviewParent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="20dp"
+        android:background="@drawable/highlited_rect"
+        android:layout_below="@id/liveTopBar"
+        android:layout_above="@+id/liveChatBoxParent"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="20dp"
+        android:padding="4dp">
+
+        <io.livekit.android.renderer.SurfaceViewRenderer
+            android:id="@+id/liveStreamsurface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/liveChatBoxParent"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/highlited_rect"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp">
+
+
+        <EditText
+            android:id="@+id/liveChatEdt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/highlited_rect"
+            android:layout_margin="10dp"
+            android:hint="chat Here..."
+            android:textColorHint="@color/offWhite"
+            android:drawableEnd="@drawable/synapsesubs"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:paddingStart="10dp"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

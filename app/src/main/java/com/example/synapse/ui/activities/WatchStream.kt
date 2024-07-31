@@ -65,9 +65,7 @@ class WatchStream : AppCompatActivity() {
     }
 
     private fun setOnClicks() {
-//        watchStreamBtn.setOnClickListener(View.OnClickListener {
-//            watchStreamViewModel.watchStream(streamName)
-//        })
+
     }
 
     private fun createView() {
