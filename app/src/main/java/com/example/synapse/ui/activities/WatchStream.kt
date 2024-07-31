@@ -33,6 +33,7 @@ class WatchStream : AppCompatActivity() {
     private lateinit var streamName : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate: called")
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_watch_stream)
@@ -48,17 +49,25 @@ class WatchStream : AppCompatActivity() {
         intent?.let {
             streamName = it.getStringExtra("name").toString()
             Log.d(TAG, "onCreate: incoming stream is : $streamName")
-//            lifecycleScope.launch(Dispatchers.Main) {
-//                delay(2000)
-//                watchStreamViewModel.watchStream(streamName!!)
-//            }
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: called")
+        watchStreamViewModel.watchStream(streamName)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause: called")
+        watchStreamViewModel.closeStream()
+    }
+
     private fun setOnClicks() {
-        watchStreamBtn.setOnClickListener(View.OnClickListener {
-            watchStreamViewModel.watchStream(streamName)
-        })
+//        watchStreamBtn.setOnClickListener(View.OnClickListener {
+//            watchStreamViewModel.watchStream(streamName)
+//        })
     }
 
     private fun createView() {

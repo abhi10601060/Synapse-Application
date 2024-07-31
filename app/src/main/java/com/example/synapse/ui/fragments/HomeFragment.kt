@@ -90,6 +90,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
 
     override fun onStreamClicked(stream: Stream) {
         val intent = Intent(activity, WatchStream::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("name" , stream.name)
         startActivity(intent)
     }

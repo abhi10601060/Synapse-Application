@@ -46,4 +46,8 @@ class WatchStreamRepo @Inject constructor(
         Log.d(TAG, "handleWatchStreamResponse: error in start stream body is null")
         return Resource.Error<WatchStreamOutput>(message = "error in start stream body is null")
     }
+
+    suspend fun closeStream(){
+        _watchStreamOutput.emit(Resource.Idle())
+    }
 }

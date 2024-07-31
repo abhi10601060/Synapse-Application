@@ -12,7 +12,10 @@ import io.livekit.android.events.collect
 import io.livekit.android.renderer.SurfaceViewRenderer
 import io.livekit.android.room.Room
 import io.livekit.android.room.track.VideoTrack
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -146,14 +149,19 @@ class WatchStreamViewModel @Inject constructor(
 
     fun watchStream(streamName : String){
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d(TAG, "watchStream: room state is ${liveKitRoom.state.name}")
+            delay(1000)
             watchStreamRepo.watchStream(streamName)
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun closeStream(){
-        viewModelScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             liveKitRoom.disconnect()
+            liveKitRoom.release()
             _streamStatus.emit(STREAM_STATUS_CLOSED)
+            watchStreamRepo.closeStream()
         }
     }
 
