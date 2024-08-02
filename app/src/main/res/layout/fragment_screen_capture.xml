@@ -61,24 +61,31 @@
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/highlited_rect"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/highlited_rect">
 
+        <TextView
+            android:id="@+id/screenCaptureChatText"
+            android:textColor="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/screenCaptureChatEdt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/highlited_rect"
             android:layout_margin="10dp"
-            android:hint="chat Here..."
-            android:textColorHint="@color/offWhite"
+            android:background="@drawable/highlited_rect"
             android:drawableEnd="@drawable/synapsesubs"
+            android:hint="chat Here..."
+            android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:paddingBottom="5dp"
-            android:paddingStart="10dp"/>
+            android:textColorHint="@color/offWhite"
+            android:singleLine="true"
+            android:imeOptions="actionSend"/>
 
     </RelativeLayout>
 </RelativeLayout>

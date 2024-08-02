@@ -3,8 +3,10 @@ package com.example.synapse.ui.activities
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -12,13 +14,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
+import com.example.synapse.model.ChatMessage
 import com.example.synapse.viemodel.WatchStreamViewModel
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import io.livekit.android.LiveKit
 import io.livekit.android.renderer.SurfaceViewRenderer
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class WatchStream : AppCompatActivity() {
@@ -31,6 +39,8 @@ class WatchStream : AppCompatActivity() {
     private lateinit var watchStreamBtn : Button
     private lateinit var chatEdt : EditText
     private lateinit var streamName : String
+    private lateinit var chatText : TextView
+    @Inject lateinit var gson : Gson
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate: called")
@@ -44,11 +54,39 @@ class WatchStream : AppCompatActivity() {
         }
         createView()
         setOnClicks()
+        setLiveChatListener()
         watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
 
         intent?.let {
             streamName = it.getStringExtra("name").toString()
             Log.d(TAG, "onCreate: incoming stream is : $streamName")
+        }
+
+        chatEdt.setOnEditorActionListener{_,actionId,_ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND){
+                Log.d(TAG, "onViewCreated: text is ${chatEdt.text.toString()}: ")
+                val text = chatEdt.text.toString()
+                if (text.isNotBlank()){
+                    watchStreamViewModel.sendChat(text)
+                }
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun setLiveChatListener() {
+        GlobalScope.launch(Dispatchers.Main) {
+            watchStreamViewModel.receivedChat.collect{chatMessageJson ->
+                if(!chatMessageJson.equals("")){
+                    val chatMessage  = gson.fromJson(chatMessageJson, ChatMessage::class.java)
+                    Log.d(TAG, "setLiveChatListener: received chat : $chatMessage")
+
+                    val totalChat = chatText.text.toString() + "\n" + chatMessage.message
+                    chatText.text = totalChat
+                }
+            }
         }
     }
 
@@ -72,5 +110,6 @@ class WatchStream : AppCompatActivity() {
         surfaceViewRenderer = findViewById(R.id.watchStreamSurface)
         chatEdt = findViewById(R.id.watchStreamChatEdt)
         watchStreamBtn = findViewById(R.id.watchStreamBtn)
+        chatText = findViewById(R.id.watchStreamChatText)
     }
 }

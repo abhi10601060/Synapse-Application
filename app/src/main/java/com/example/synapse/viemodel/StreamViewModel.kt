@@ -5,8 +5,10 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synapse.model.ChatMessage
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.StreamRepo
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.livekit.android.events.RoomEvent
 import io.livekit.android.events.collect
@@ -31,7 +33,8 @@ const val STREAM_STATUS_STOP_ERROR = "stop_error"
 
 @HiltViewModel
 class StreamViewModel @Inject constructor(
-    private val streamRepo: StreamRepo
+    private val streamRepo: StreamRepo,
+    private val gson : Gson
 )  : ViewModel(){
 
     private lateinit var liveKitRoom : Room
@@ -46,12 +49,18 @@ class StreamViewModel @Inject constructor(
     private var isScreenCaptureRequest = true
     private var mediaProjectionIntent : Intent? = null
 
+
     private val _streamStatus = MutableStateFlow<String>(STREAM_STATUS_IDLE)
     val streamStatus : StateFlow<String>
         get() = _streamStatus
 
     val streamTokenStatus : StateFlow<String>
         get() = streamRepo.streamTokenStatus
+
+    private val _receivedChat = MutableStateFlow<String>("")
+    val receivedChat : StateFlow<String>
+        get() = _receivedChat
+
 
 //    val stopStreamOutput : StateFlow<Resource<StopStreamOutput>>
 //        get() = streamRepo.stopStreamOutput
@@ -154,6 +163,7 @@ class StreamViewModel @Inject constructor(
                     is RoomEvent.DataReceived ->{
                         Log.d(TAG, "activateRoomEventListener: dataReceived")
 
+                        _receivedChat.emit(String(event.data))
                     }
 
                     is RoomEvent.Connected ->{
@@ -221,6 +231,13 @@ class StreamViewModel @Inject constructor(
                 attachVideo(track)
                 break
             }
+        }
+    }
+
+    fun sendChat(msg : String){
+        viewModelScope.launch(Dispatchers.IO) {
+            val chatMessage = ChatMessage("streamer", msg)
+            streamer.publishData(gson.toJson(chatMessage).toByteArray())
         }
     }
 

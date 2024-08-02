@@ -6,16 +6,25 @@ import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
+import com.example.synapse.model.ChatMessage
 import com.example.synapse.viemodel.StreamViewModel
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import io.livekit.android.LiveKit
 import io.livekit.android.renderer.SurfaceViewRenderer
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
@@ -25,12 +34,16 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
 
     private lateinit var streamSurfaceViewRenderer: SurfaceViewRenderer
     private lateinit var stopStreamBtn : Button
+    private lateinit var chatText : TextView
+    private lateinit var chatEdt : EditText
+    @Inject lateinit var gson : Gson
 
     private var name : String? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createView(view)
+        setLiveChatListener()
         setOnClicks()
 
         streamViewModel.init(streamSurfaceViewRenderer,
@@ -41,6 +54,33 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
             Log.d(TAG, "onViewCreated: received name : $name")
             if (name != null) {
                 askMediaProjectionPermission()
+            }
+        }
+
+        chatEdt.setOnEditorActionListener{_,actionId,_ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND){
+                Log.d(TAG, "onViewCreated: text is ${chatEdt.text.toString()}: ")
+                val text = chatEdt.text.toString()
+                if (text.isNotBlank()){
+                    streamViewModel.sendChat(text)
+                }
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun setLiveChatListener() {
+        GlobalScope.launch(Dispatchers.Main) {
+            streamViewModel.receivedChat.collect{chatMessageJson ->
+                if(!chatMessageJson.equals("")){
+                    val chatMessage  = gson.fromJson(chatMessageJson, ChatMessage::class.java)
+                    Log.d(TAG, "setLiveChatListener: received chat : $chatMessage")
+
+                    val totalChat = chatText.text.toString() + "\n" + chatMessage.message
+                    chatText.text = totalChat
+                }
             }
         }
     }
@@ -70,5 +110,7 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     private fun createView(view : View) {
         streamSurfaceViewRenderer = view.findViewById(R.id.stream_surface)
         stopStreamBtn = view.findViewById(R.id.screenCaptureStopStreamBtn)
+        chatText = view.findViewById(R.id.screenCaptureChatText)
+        chatEdt = view.findViewById(R.id.screenCaptureChatEdt)
     }
 }

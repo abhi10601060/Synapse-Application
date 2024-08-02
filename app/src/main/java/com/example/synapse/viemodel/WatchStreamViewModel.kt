@@ -4,13 +4,16 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synapse.model.ChatMessage
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.WatchStreamRepo
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.livekit.android.events.RoomEvent
 import io.livekit.android.events.collect
 import io.livekit.android.renderer.SurfaceViewRenderer
 import io.livekit.android.room.Room
+import io.livekit.android.room.participant.LocalParticipant
 import io.livekit.android.room.track.VideoTrack
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +35,8 @@ const val STREAM_STATUS_CLOSE_ERROR = "clos_error"
 
 @HiltViewModel
 class WatchStreamViewModel @Inject constructor(
-    private val watchStreamRepo: WatchStreamRepo
+    private val watchStreamRepo: WatchStreamRepo,
+    private val gson: Gson
 ) : ViewModel() {
 
     val TAG = "WatchStreamViewModel"
@@ -41,10 +45,15 @@ class WatchStreamViewModel @Inject constructor(
     @SuppressLint("StaticFieldLeak")
     private lateinit var surfaceViewRenderer: SurfaceViewRenderer
     private lateinit var liveKitRoom: Room
+    private lateinit var viewer : LocalParticipant
 
     private val _streamStatus = MutableStateFlow<String>(STREAM_STATUS_IDLE)
     val streamStatus : StateFlow<String>
         get() = _streamStatus
+
+    private val _receivedChat = MutableStateFlow<String>("")
+    val receivedChat : StateFlow<String>
+        get() = _receivedChat
 
     fun init(surfaceViewRenderer: SurfaceViewRenderer, room : Room?){
         this.surfaceViewRenderer = surfaceViewRenderer
@@ -121,12 +130,14 @@ class WatchStreamViewModel @Inject constructor(
                     is RoomEvent.DataReceived ->{
                         Log.d(TAG, "activateRoomEventListener: dataReceived")
 
+                        _receivedChat.emit(String(event.data))
                     }
 
                     is RoomEvent.Connected ->{
                         Log.d(TAG, "activateRoomEventListener: connected")
 
                         _streamStatus.emit(STREAM_STATUS_LOADING)
+                        viewer = liveKitRoom.localParticipant
                     }
 
                     is RoomEvent.Disconnected ->{
@@ -162,6 +173,13 @@ class WatchStreamViewModel @Inject constructor(
             liveKitRoom.release()
             _streamStatus.emit(STREAM_STATUS_CLOSED)
             watchStreamRepo.closeStream()
+        }
+    }
+
+    fun sendChat(msg : String){
+        viewModelScope.launch(Dispatchers.IO) {
+            val chatMessage = ChatMessage(userName = "viewer" , message = msg)
+            viewer.publishData(gson.toJson(chatMessage).toByteArray())
         }
     }
 
