@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.viemodel.StreamViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,7 +37,7 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
     private lateinit var streamSurfaceViewRenderer: SurfaceViewRenderer
     private lateinit var stopStreamBtn : Button
     private lateinit var chatEdt : EditText
-    private lateinit var chatText : TextView
+    private lateinit var chatBox : CustomChatBox
     @Inject lateinit var gson : Gson
 
     private var name : String? = null
@@ -84,8 +85,7 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
                     val chatMessage  = gson.fromJson(chatMessageJson, ChatMessage::class.java)
                     Log.d(TAG, "setLiveChatListener: received chat : $chatMessage")
 
-                    val totalChat = chatText.text.toString() + "\n" + chatMessage.message
-                    chatText.text = totalChat
+                    chatBox.addChatMessage(chatMessage)
                 }
             }
         }
@@ -129,6 +129,6 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
         stopStreamBtn = view.findViewById(R.id.liveStopStreamBtn)
         streamSurfaceViewRenderer = view.findViewById(R.id.liveStreamsurface)
         chatEdt = view.findViewById(R.id.liveChatEdt)
-        chatText = view.findViewById(R.id.liveChatText)
+        chatBox = view.findViewById(R.id.liveChatBox)
     }
 }

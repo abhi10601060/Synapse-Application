@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.viemodel.StreamViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,7 +35,7 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
 
     private lateinit var streamSurfaceViewRenderer: SurfaceViewRenderer
     private lateinit var stopStreamBtn : Button
-    private lateinit var chatText : TextView
+    private lateinit var chatBox : CustomChatBox
     private lateinit var chatEdt : EditText
     @Inject lateinit var gson : Gson
 
@@ -78,8 +79,7 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
                     val chatMessage  = gson.fromJson(chatMessageJson, ChatMessage::class.java)
                     Log.d(TAG, "setLiveChatListener: received chat : $chatMessage")
 
-                    val totalChat = chatText.text.toString() + "\n" + chatMessage.message
-                    chatText.text = totalChat
+                    chatBox.addChatMessage(chatMessage)
                 }
             }
         }
@@ -110,7 +110,7 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     private fun createView(view : View) {
         streamSurfaceViewRenderer = view.findViewById(R.id.stream_surface)
         stopStreamBtn = view.findViewById(R.id.screenCaptureStopStreamBtn)
-        chatText = view.findViewById(R.id.screenCaptureChatText)
+        chatBox = view.findViewById(R.id.screenCaptureChatBox)
         chatEdt = view.findViewById(R.id.screenCaptureChatEdt)
     }
 }

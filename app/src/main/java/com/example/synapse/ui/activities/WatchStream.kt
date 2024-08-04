@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.viemodel.WatchStreamViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,10 +37,9 @@ class WatchStream : AppCompatActivity() {
     private val watchStreamViewModel : WatchStreamViewModel by viewModels()
 
     private lateinit var surfaceViewRenderer: SurfaceViewRenderer
-    private lateinit var watchStreamBtn : Button
     private lateinit var chatEdt : EditText
     private lateinit var streamName : String
-    private lateinit var chatText : TextView
+    private lateinit var chatBox: CustomChatBox
     @Inject lateinit var gson : Gson
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,8 +83,7 @@ class WatchStream : AppCompatActivity() {
                     val chatMessage  = gson.fromJson(chatMessageJson, ChatMessage::class.java)
                     Log.d(TAG, "setLiveChatListener: received chat : $chatMessage")
 
-                    val totalChat = chatText.text.toString() + "\n" + chatMessage.message
-                    chatText.text = totalChat
+                    chatBox.addChatMessage(chatMessage)
                 }
             }
         }
@@ -109,7 +108,6 @@ class WatchStream : AppCompatActivity() {
     private fun createView() {
         surfaceViewRenderer = findViewById(R.id.watchStreamSurface)
         chatEdt = findViewById(R.id.watchStreamChatEdt)
-        watchStreamBtn = findViewById(R.id.watchStreamBtn)
-        chatText = findViewById(R.id.watchStreamChatText)
+        chatBox = findViewById(R.id.watchStreamChatBox)
     }
 }

@@ -24,7 +24,7 @@ class CustomChatBox (
         chatBoxRv = view.findViewById(R.id.customChatBoxRV)
         adapter.submitList(chatList)
         chatBoxRv.adapter = adapter
-        chatBoxRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
+        chatBoxRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         attrs?.let {
 
         }
