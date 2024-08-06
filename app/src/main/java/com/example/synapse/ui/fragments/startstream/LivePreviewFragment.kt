@@ -2,10 +2,14 @@ package com.example.synapse.ui.fragments.startstream
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -20,6 +24,8 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.synapse.R
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 @AndroidEntryPoint
 class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
@@ -70,12 +76,24 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
                 val uri = result.data?.data
                 val picturePath =getRealPathFromUri(uri!!)
                 Log.d(TAG, "registerResultLauncher: receivedUri: ${uri} and real path: $picturePath")
+                val thumbnailSize = 480
+                val thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(picturePath),thumbnailSize, thumbnailSize)
                 thumbnailPath.text = picturePath
-                thumbNailPreview.setImageURI(uri)
+                thumbNailPreview.setImageBitmap(thumbnail)
+                val base64Image = getBase64FromBitmap(thumbnail)
+                Log.d(TAG, "registerResultLauncher: base64Image : $base64Image")
             }catch (e : Exception){
                 Log.d(TAG, "registerResultLauncher: eexception : ${e}")
             }
         }
+    }
+
+    private fun getBase64FromBitmap(bitmap : Bitmap) : String {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 
     @SuppressLint("Recycle")
@@ -97,10 +115,10 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
     }
 
     private fun createView(view: View) {
+        titleEdt = view.findViewById(R.id.livePreviewStreamTitleEdt)
         startStreamBtn = view.findViewById(R.id.livePreviewStartStreamBtn)
         browseThumbnailBtn = view.findViewById(R.id.livePreviewBrowseBtn)
         thumbNailPreview = view.findViewById(R.id.liveStreamThumbnailImg)
-        thumbnailPath =view.findViewById(R.id.livePreviewThumbnailPathTxt)
-//        titleEdt = view.findViewById(R.id.liveDetailTitleEdt)
+        thumbnailPath =view.findViewById(R.id.livePreviewThumbnailPathTxt) 
     }
 }
