@@ -11,7 +11,6 @@ class SharedprefUtil() {
         const val ACTIVE_STREAM_KEY = "active_stream"
     }
 
-
     constructor(context: Context) : this(){
         sharedPreferences = context.getSharedPreferences(SHAREDPREF_ID, 0)
     }
@@ -26,5 +25,13 @@ class SharedprefUtil() {
 
     fun deleteString(key : String){
         sharedPreferences.edit().remove(key).apply()
+    }
+
+    fun addAbhiData(){
+        putString(USER_TOKEN_KEY, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IkFiaGkiLCJleHAiOjE3Mjc0NzM1MjV9.r4P2uPt_uAugm6MyycZAYANP7uy3NsUSolLhAg6RW8o")
+    }
+
+    fun addShubhamData(){
+        putString(USER_TOKEN_KEY, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IlNodWJoYW0iLCJleHAiOjE3Mjc0NzM1ODh9.dMcROKZW0-qrcmf-reqz2IdJMr9EvpXpEPksy6vEjAA")
     }
 }

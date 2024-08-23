@@ -5,6 +5,7 @@ import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.DITest
 import com.example.synapse.network.SynapseService
 import com.example.synapse.repo.MainRepo
+import com.example.synapse.repo.ProfileRepo
 import com.example.synapse.repo.StreamRepo
 import com.example.synapse.repo.WatchStreamRepo
 import com.google.gson.Gson
@@ -37,7 +38,7 @@ class AppModule {
     @Provides
     @Singleton
     fun getRetroInstance() : Retrofit{
-        val url = "http://ec2-13-233-98-255.ap-south-1.compute.amazonaws.com:8010/"
+        val url = "http://ec2-3-110-103-111.ap-south-1.compute.amazonaws.com:8010/"
         return Retrofit.Builder()
             .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
@@ -72,5 +73,11 @@ class AppModule {
     @Singleton
     fun getWatchStreamRepository(synapseService: SynapseService, sharedprefUtil: SharedprefUtil, gson: Gson) : WatchStreamRepo{
         return WatchStreamRepo(synapseService, sharedprefUtil, gson)
+    }
+
+    @Provides
+    @Singleton
+    fun getProfileRepository(synapseService: SynapseService, sharedprefUtil: SharedprefUtil) : ProfileRepo{
+        return ProfileRepo(synapseService, sharedprefUtil)
     }
 }
