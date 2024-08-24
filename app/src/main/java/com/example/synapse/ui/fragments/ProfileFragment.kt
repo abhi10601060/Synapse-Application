@@ -1,28 +1,45 @@
 package com.example.synapse.ui.fragments
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.ThumbnailUtils
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresExtension
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.synapse.R
+import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.network.Resource
 import com.example.synapse.viemodel.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import java.io.ByteArrayOutputStream
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private val TAG = "ProfileFragment"
-    private val profileViewModel : ProfileViewModel by viewModels()
+    private lateinit var profileViewModel : ProfileViewModel
 
     private lateinit var editProfile : ImageView
     private lateinit var editProfileImageOptions : RelativeLayout
@@ -33,13 +50,26 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private lateinit var editBioClose : ImageView
     private lateinit var editBioDone : ImageView
 
+    private lateinit var userName : TextView
+    private lateinit var profilePic : ImageView
+    private lateinit var userBio : TextView
+    private lateinit var userBioEdt : EditText
+    private lateinit var subsCount : TextView
 
+    private lateinit var  resultLauncher : ActivityResultLauncher<Intent>
+    private lateinit var changedImageBase64 : String
+    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val viewModel : ProfileViewModel by viewModels()
+        profileViewModel = viewModel
 
         createView(view)
         listenToEditStates()
         listenToProfileDetailsOutput()
+        listenToUpdateProfilePicOutput()
+        registerResultLauncher()
         setOnClicks()
 
         profileViewModel.addAbhiData()
@@ -47,21 +77,49 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         profileViewModel.getOwnProfileDetails()
     }
 
+    private fun listenToUpdateProfilePicOutput() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            profileViewModel.updateProfilePicOutPut.collect(){res ->
+                when(res){
+                    is Resource.Loading ->{
+                        Toast.makeText(context, "loading update pic", Toast.LENGTH_SHORT).show()
+                    }
+
+                    is Resource.Error ->{
+                        Toast.makeText(context, "Error in updating profile picture ", Toast.LENGTH_LONG).show()
+                        loadImageFromProfileDetails()
+                    }
+
+                    is Resource.Success ->{
+                        Log.d(TAG, "listenToProfileDetailsOutput: ${res.data}")
+                        Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_LONG).show()
+                        profileViewModel.closeEditImageState()
+                        loadImageFromProfileDetails()
+                    }
+
+                    else ->{
+
+                    }
+                }
+            }
+        }
+    }
+
     private fun listenToProfileDetailsOutput() {
         lifecycleScope.launch(Dispatchers.Main) {
             profileViewModel.profileDetails.collect(){res ->
                 when(res){
                     is Resource.Loading ->{
-                        Toast.makeText(context, "loading", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "loading Profile Details", Toast.LENGTH_SHORT).show()
                     }
 
                     is Resource.Error ->{
-                        Toast.makeText(context, "error", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Error in getting profile details", Toast.LENGTH_SHORT).show()
                     }
 
                     is Resource.Success ->{
                         Log.d(TAG, "listenToProfileDetailsOutput: ${res.data}")
-//                        displayProfileDetails(res)
+                        res.data?.let { displayProfileDetails(it.profileDetails) }
                     }
                     else ->{
                         Toast.makeText(context, "else block", Toast.LENGTH_SHORT).show()
@@ -71,11 +129,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
     }
 
-//    private fun displayProfileDetails(res: Resource.Success<ProfileDetailsOutPut>) {
-//        TODO("Not yet implemented")
-//    }
+    private fun displayProfileDetails(profileDetails: ProfileDetails) {
+        userName.text = profileDetails.userName
+        userBio.text = profileDetails.bio
+        loadImageFromProfileDetails()
+        subsCount.text = profileDetails.totalSubs
+    }
 
-
+    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     private fun setOnClicks() {
         editBio.setOnClickListener(View.OnClickListener {
             profileViewModel.onEditBioState()
@@ -87,11 +148,29 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         editProfile.setOnClickListener(View.OnClickListener {
             profileViewModel.onEditImageState()
+            pickImage()
         })
 
         editProfileClose.setOnClickListener(View.OnClickListener {
             profileViewModel.closeEditImageState()
+            loadImageFromProfileDetails()
         })
+
+        editProfileDone.setOnClickListener(View.OnClickListener {
+            profileViewModel.updateProfilePic(changedImageBase64)
+            profileViewModel.closeEditImageState()
+        })
+    }
+
+    private fun loadImageFromProfileDetails() {
+        val res = profileViewModel.profileDetails.value
+        if (res is Resource.Success){
+            val profilePicUrl = res.data?.profileDetails?.profilePictureUrl
+            context?.let { Glide.with(it).load(profilePicUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE )
+                .skipMemoryCache(true)
+                .into(profilePic) }
+        }
     }
 
     private fun listenToEditStates() {
@@ -123,6 +202,56 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
     }
 
+    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
+    private fun pickImage(){
+        val intent = Intent(MediaStore.ACTION_PICK_IMAGES)
+        resultLauncher.launch(intent)
+    }
+    private fun registerResultLauncher(){
+        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+            try {
+                val uri = result.data?.data
+                val picturePath =getRealPathFromUri(uri!!)
+                Log.d(TAG, "registerResultLauncher: receivedUri: ${uri} and real path: $picturePath")
+                val thumbnailSize = 240
+                val thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(picturePath),thumbnailSize, thumbnailSize)
+                profilePic.setImageBitmap(thumbnail)
+                val base64Image = getBase64FromBitmap(thumbnail)
+                changedImageBase64 = base64Image
+//                Log.d(TAG, "registerResultLauncher: base64Image : $base64Image")
+            }catch (e : Exception){
+                Log.d(TAG, "registerResultLauncher: eexception : ${e}")
+            }
+        }
+    }
+
+    @SuppressLint("Recycle")
+    private fun getRealPathFromUri(uri : Uri) : String{
+        var result : String? = null
+        val projection : Array<String> = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor = context?.contentResolver?.query(uri, projection, null, null, null)
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                val column_index = cursor.getColumnIndexOrThrow(projection.get(0))
+                result = cursor.getString(column_index)
+            }
+            cursor.close()
+        }
+        if (result == null) {
+            result = "Not found"
+        }
+        return result
+    }
+
+    private fun getBase64FromBitmap(bitmap : Bitmap) : String {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP)
+    }
+
+
     private fun createView(view: View) {
         editProfile = view.findViewById(R.id.profileImageEditImg)
         editBioOptions = view.findViewById(R.id.profileEditBioOptionsRL)
@@ -132,5 +261,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         editBio = view.findViewById(R.id.profileEditBioImg)
         editBioClose = view.findViewById(R.id.editBioClose)
         editBioDone = view.findViewById(R.id.editBioDone)
+
+        userBio = view.findViewById(R.id.profileBioTxt)
+        userBioEdt = view.findViewById(R.id.profileBioEditText)
+        profilePic = view.findViewById(R.id.profilePictureImg)
+        userName = view.findViewById(R.id.profileName)
+        subsCount = view.findViewById(R.id.profileSubscriberTxt)
     }
 }

@@ -3,11 +3,15 @@ package com.example.synapse.repo
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.synapse.db.SharedprefUtil
+import com.example.synapse.model.req.UpdateProfilePicInput
 import com.example.synapse.model.res.ProfileDetailsOutPut
+import com.example.synapse.model.res.UpdateProfileOutput
 import com.example.synapse.network.Resource
 import com.example.synapse.network.SynapseService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -20,6 +24,10 @@ class ProfileRepo @Inject constructor(
     val profileDetails : StateFlow<Resource<ProfileDetailsOutPut>>
         get() = _profileDetails
 
+    private val _updateProfilePicOutput = MutableStateFlow<Resource<UpdateProfileOutput>>(Resource.Idle())
+    val updateProfilePicOutput : StateFlow<Resource<UpdateProfileOutput>>
+        get() = _updateProfilePicOutput
+
     suspend fun getProfileDetails(){
         val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
         Log.d(TAG, "getProfileDetails: token is : ${token}")
@@ -28,13 +36,32 @@ class ProfileRepo @Inject constructor(
         _profileDetails.emit(handleProfileDetailResponse(res!!))
     }
 
-
     fun handleProfileDetailResponse(res : Response<ProfileDetailsOutPut>) : Resource<ProfileDetailsOutPut>{
         if (res.isSuccessful && res.body() != null){
             return Resource.Success<ProfileDetailsOutPut>(data = res.body()!!)
         }
         Log.d(TAG, "handleProfileDetailResponse: error in response")
         return Resource.Error(message = "unable to fetch details")
+    }
+
+    suspend fun updateProfilePic(img : String){
+        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+
+        val res = token?.let { synapseService.updateProfilePic(it, UpdateProfilePicInput(img)) }
+        _updateProfilePicOutput.emit(handleProfilePicUpdate(res!!))
+        delay(500)
+        _updateProfilePicOutput.emit(Resource.Idle())
+    }
+
+    private fun handleProfilePicUpdate(res : Response<UpdateProfileOutput>) : Resource<UpdateProfileOutput>{
+        if (res.isSuccessful && res.body() != null){
+            return Resource.Success(data = res.body()!!)
+        }
+        return Resource.Error(message = "error in profile pic update")
+    }
+
+    fun updateBio(bio :String){
+
     }
 
     fun addAbhiToken(){

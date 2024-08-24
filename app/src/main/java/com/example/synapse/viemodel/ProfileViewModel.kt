@@ -3,6 +3,7 @@ package com.example.synapse.viemodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synapse.model.res.ProfileDetailsOutPut
+import com.example.synapse.model.res.UpdateProfileOutput
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.ProfileRepo
 import com.google.gson.Gson
@@ -28,6 +29,9 @@ class ProfileViewModel @Inject constructor(
 
     val profileDetails : StateFlow<Resource<ProfileDetailsOutPut>>
         get() = profileRepo.profileDetails
+
+    val updateProfilePicOutPut : StateFlow<Resource<UpdateProfileOutput>>
+        get() = profileRepo.updateProfilePicOutput
 
     fun getOwnProfileDetails(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -65,5 +69,11 @@ class ProfileViewModel @Inject constructor(
 
     fun addShubhamData(){
         profileRepo.addShubhamToken()
+    }
+
+    fun updateProfilePic(img : String){
+        viewModelScope.launch(Dispatchers.IO) {
+            profileRepo.updateProfilePic(img)
+        }
     }
 }

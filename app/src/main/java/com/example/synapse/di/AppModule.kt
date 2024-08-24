@@ -16,8 +16,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.livekit.android.LiveKit
 import io.livekit.android.room.Room
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -39,8 +42,22 @@ class AppModule {
     @Singleton
     fun getRetroInstance() : Retrofit{
         val url = "http://ec2-3-110-103-111.ap-south-1.compute.amazonaws.com:8010/"
+
+        val intercepter = HttpLoggingInterceptor().apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
+        }
+        val client = OkHttpClient.Builder().apply {
+            this.addInterceptor(intercepter)
+                // time out setting
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(20,TimeUnit.SECONDS)
+                .writeTimeout(25,TimeUnit.SECONDS)
+
+        }.build()
+
         return Retrofit.Builder()
             .baseUrl(url)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

@@ -2,11 +2,13 @@ package com.example.synapse.network
 
 import com.example.synapse.model.req.StopStreamInput
 import com.example.synapse.model.req.StartStreamInput
+import com.example.synapse.model.req.UpdateProfilePicInput
 import com.example.synapse.model.res.WatchStreamOutput
 import com.example.synapse.model.res.AllActiveStreamOutput
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.StopStreamOutput
 import com.example.synapse.model.res.StartStreamOutput
+import com.example.synapse.model.res.UpdateProfileOutput
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -53,4 +55,18 @@ interface SynapseService {
     suspend fun getOwnProfileDetails(
         @Header("Authentication-Token") token: String
     ) : Response<ProfileDetailsOutPut>
+
+    @POST("user/update/profile-pic")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun updateProfilePic(
+        @Header("Authentication-Token") token: String,
+        @Body profilePicture : UpdateProfilePicInput
+    ) : Response<UpdateProfileOutput>
+
+    @POST("user/update/bio")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun updateBio(
+        @Header("Authentication-Token") token: String,
+        @Body bio : String
+    ) : Response<UpdateProfileOutput>
 }
