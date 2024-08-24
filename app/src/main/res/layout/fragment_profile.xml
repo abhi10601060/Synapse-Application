@@ -152,11 +152,14 @@
             android:letterSpacing="0.1"/>
 
         <EditText
+            android:gravity="start"
             android:visibility="invisible"
             android:id="@+id/profileBioEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:lines="4"
+            android:padding="3dp"
+            android:maxLength="150"
             android:maxLines="4"
             android:layout_below="@id/profileBioLL"
             android:background="@drawable/highlited_rect"/>

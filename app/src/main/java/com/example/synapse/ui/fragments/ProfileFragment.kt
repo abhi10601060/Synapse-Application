@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -69,6 +70,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         listenToEditStates()
         listenToProfileDetailsOutput()
         listenToUpdateProfilePicOutput()
+        listenToUpdateBioOutput()
         registerResultLauncher()
         setOnClicks()
 
@@ -95,6 +97,32 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_LONG).show()
                         profileViewModel.closeEditImageState()
                         loadImageFromProfileDetails()
+                    }
+
+                    else ->{
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun listenToUpdateBioOutput() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            profileViewModel.updateBioOutPut.collect(){res ->
+                when(res){
+                    is Resource.Loading ->{
+                        Toast.makeText(context, "loading update bio", Toast.LENGTH_SHORT).show()
+                    }
+
+                    is Resource.Error ->{
+                        Toast.makeText(context, "Error in updating bio ", Toast.LENGTH_LONG).show()
+                    }
+
+                    is Resource.Success ->{
+                        Log.d(TAG, "listenToProfileDetailsOutput: ${res.data}")
+                        Toast.makeText(context, "Bio updated successfully", Toast.LENGTH_LONG).show()
+                        userBio.text = userBioEdt.text.toString()
                     }
 
                     else ->{
@@ -146,6 +174,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             profileViewModel.closeEditBioState()
         })
 
+        editBioDone.setOnClickListener(View.OnClickListener {
+            profileViewModel.closeEditBioState()
+            if (!userBio.text.equals(userBioEdt.text.toString())){
+                Log.d(TAG, "setOnClicks: updating bio to : ${userBioEdt.text.toString()}")
+                profileViewModel.updateBio(userBioEdt.text.toString())
+            }
+        })
+
         editProfile.setOnClickListener(View.OnClickListener {
             profileViewModel.onEditImageState()
             pickImage()
@@ -193,10 +229,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 if (isOn){
                     editBio.visibility = View.GONE
                     editBioOptions.visibility = View.VISIBLE
+                    userBio.visibility = View.GONE
+                    userBioEdt.visibility = View.VISIBLE
+                    userBioEdt.setText(userBio.text.toString())
                 }
                 else{
                     editBio.visibility = View.VISIBLE
                     editBioOptions.visibility = View.GONE
+                    userBio.visibility = View.VISIBLE
+                    userBioEdt.visibility = View.GONE
                 }
             }
         }

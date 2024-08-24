@@ -2,6 +2,7 @@ package com.example.synapse.network
 
 import com.example.synapse.model.req.StopStreamInput
 import com.example.synapse.model.req.StartStreamInput
+import com.example.synapse.model.req.UpdateBioInput
 import com.example.synapse.model.req.UpdateProfilePicInput
 import com.example.synapse.model.res.WatchStreamOutput
 import com.example.synapse.model.res.AllActiveStreamOutput
@@ -67,6 +68,6 @@ interface SynapseService {
     @Headers("Accept: application/json", "Content-Type: application/json")
     suspend fun updateBio(
         @Header("Authentication-Token") token: String,
-        @Body bio : String
+        @Body bio : UpdateBioInput
     ) : Response<UpdateProfileOutput>
 }

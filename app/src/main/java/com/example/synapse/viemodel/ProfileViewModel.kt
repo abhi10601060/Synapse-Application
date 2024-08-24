@@ -32,6 +32,8 @@ class ProfileViewModel @Inject constructor(
 
     val updateProfilePicOutPut : StateFlow<Resource<UpdateProfileOutput>>
         get() = profileRepo.updateProfilePicOutput
+    val updateBioOutPut : StateFlow<Resource<UpdateProfileOutput>>
+        get() = profileRepo.updateBioOutput
 
     fun getOwnProfileDetails(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -74,6 +76,12 @@ class ProfileViewModel @Inject constructor(
     fun updateProfilePic(img : String){
         viewModelScope.launch(Dispatchers.IO) {
             profileRepo.updateProfilePic(img)
+        }
+    }
+
+    fun updateBio(bio : String){
+        viewModelScope.launch(Dispatchers.IO) {
+            profileRepo.updateBio(bio)
         }
     }
 }

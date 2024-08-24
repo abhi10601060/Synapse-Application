@@ -3,6 +3,7 @@ package com.example.synapse.repo
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.synapse.db.SharedprefUtil
+import com.example.synapse.model.req.UpdateBioInput
 import com.example.synapse.model.req.UpdateProfilePicInput
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.UpdateProfileOutput
@@ -28,6 +29,10 @@ class ProfileRepo @Inject constructor(
     val updateProfilePicOutput : StateFlow<Resource<UpdateProfileOutput>>
         get() = _updateProfilePicOutput
 
+    private val _updateBioOutput = MutableStateFlow<Resource<UpdateProfileOutput>>(Resource.Idle())
+    val updateBioOutput : StateFlow<Resource<UpdateProfileOutput>>
+        get() = _updateBioOutput
+
     suspend fun getProfileDetails(){
         val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
         Log.d(TAG, "getProfileDetails: token is : ${token}")
@@ -48,20 +53,24 @@ class ProfileRepo @Inject constructor(
         val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
 
         val res = token?.let { synapseService.updateProfilePic(it, UpdateProfilePicInput(img)) }
-        _updateProfilePicOutput.emit(handleProfilePicUpdate(res!!))
+        _updateProfilePicOutput.emit(handleProfileUpdate(res!!))
         delay(500)
         _updateProfilePicOutput.emit(Resource.Idle())
     }
+    suspend fun updateBio(bio :String){
+        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
 
-    private fun handleProfilePicUpdate(res : Response<UpdateProfileOutput>) : Resource<UpdateProfileOutput>{
+        val res = token?.let { synapseService.updateBio(it, UpdateBioInput(bio)) }
+        _updateBioOutput.emit(handleProfileUpdate(res!!))
+        delay(500)
+        _updateBioOutput.emit(Resource.Idle())
+    }
+
+    private fun handleProfileUpdate(res : Response<UpdateProfileOutput>) : Resource<UpdateProfileOutput>{
         if (res.isSuccessful && res.body() != null){
             return Resource.Success(data = res.body()!!)
         }
         return Resource.Error(message = "error in profile pic update")
-    }
-
-    fun updateBio(bio :String){
-
     }
 
     fun addAbhiToken(){
