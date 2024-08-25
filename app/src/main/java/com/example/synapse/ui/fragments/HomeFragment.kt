@@ -49,7 +49,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
                      is Resource.Success ->{
                          launch(Dispatchers.Main) {
                              val allStreams = it.data!!.streams
-                             val adapter = ActiveStreamsAdapter(this@HomeFragment)
+                             val adapter = ActiveStreamsAdapter(this@HomeFragment, context)
                              adapter.submitList(allStreams)
                              activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
                              activeStreamsRV.adapter = adapter
@@ -91,7 +91,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
     override fun onStreamClicked(stream: Stream) {
         val intent = Intent(activity, WatchStream::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra("name" , stream.name)
+        intent.putExtra("name" , stream.title)
         startActivity(intent)
     }
 }

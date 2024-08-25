@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="10dp"
     android:background="@color/backgroundBlack">
 
@@ -9,18 +10,99 @@
         android:id="@+id/streamThumbnailImg"
         android:layout_centerHorizontal="true"
         android:layout_width="300dp"
-        android:layout_height="100dp"
+        android:layout_height="180dp"
         android:src="@mipmap/synapse_full_logo"/>
 
-    <TextView
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:foregroundGravity="center_vertical"
+        android:id="@+id/streamInfoRL"
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="5dp"
         android:layout_height="wrap_content"
-        android:id="@+id/streamTitle"
-        android:layout_below="@+id/streamThumbnailImg"
-        android:textColor="@color/white"
-        android:text="streanm name"
-        android:textSize="20sp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_below="@+id/streamThumbnailImg">
+
+        <androidx.cardview.widget.CardView
+            android:layout_centerVertical="true"
+            android:id="@+id/userProfileCard"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:cardCornerRadius="18dp">
+
+            <ImageView
+                android:id="@+id/streamerProfileImg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_launcher"/>
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_toRightOf="@id/userProfileCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/streamTitle"
+            android:textColor="@color/white"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="streanm name is \nkdadadddada"
+            android:textSize="20sp"
+            android:layout_marginStart="10dp" />
+
+        <LinearLayout
+            android:id="@+id/streamDetailsLL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/streamTitle"
+            android:layout_toRightOf="@id/userProfileCard"
+            android:layout_marginStart="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Abhi1060"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/grey"
+                android:id="@+id/streamerName"/>
+
+            <View
+                android:layout_gravity="center_vertical"
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:background="@drawable/dot_separator"
+                android:layout_margin="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.6 crore views"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/grey"
+                android:id="@+id/streamViews"/>
+
+            <View
+                android:layout_gravity="center_vertical"
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:background="@drawable/dot_separator"
+                android:layout_margin="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4days ago"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/grey"
+                android:id="@+id/streamStartTime"/>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
 
 </RelativeLayout>

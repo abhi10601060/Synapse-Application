@@ -63,14 +63,14 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
             thumbnail = it.getString("thumbnail").toString()
 
             Log.d(TAG, "onViewCreated: received name : $title, desc: $desc, tags: $tags")
-//            if (title != null) {
-//                if (isPermissionsGranted()){
-//                    streamViewModel.startLive(StartStreamInput(title!!, desc, tags, thumbnail, false))
-//                }
-//                else{
-//                    askPermissions()
-//                }
-//            }
+            if (title != null) {
+                if (isPermissionsGranted()){
+                    streamViewModel.startLive(StartStreamInput(title!!, desc, tags, thumbnail, false))
+                }
+                else{
+                    askPermissions()
+                }
+            }
         }
 
         chatEdt.setOnEditorActionListener{_,actionId,_ ->
