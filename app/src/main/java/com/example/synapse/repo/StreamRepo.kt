@@ -43,24 +43,25 @@ class StreamRepo @Inject constructor(
     val allActiveStreams : StateFlow<Resource<AllActiveStreamOutput>>
         get() = _allActiveStreams
 
-    suspend fun startStream(roomName : String){
+    suspend fun startStream(streamInfo : StartStreamInput){
         _startStreamOutput.emit(Resource.Loading())
-        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-        token = DUMMY_STREAMER_TOKEN
+        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+//        token = DUMMY_STREAMER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _startStreamOutput.emit(Resource.Error(message = "token Invalid"))
             return
         }
 
-        val res = synapseService.startStream(token, StartStreamInput(roomName))
+        Log.d(TAG, "startStream json input: ${gson.toJson(streamInfo)}")
+        val res = synapseService.startStream(token, streamInfo)
         val resource = handleStartStreamResponse(res)
         _startStreamOutput.emit(resource)
 
         when(resource){
             is Resource.Success ->{
                 _streamTokenStatus.emit(STREAM_TOKEN_STATUS_CREATED)
-                sharedprefUtil.putString(SharedprefUtil.ACTIVE_STREAM_KEY, roomName)
+                resource.data?.let { sharedprefUtil.putString(SharedprefUtil.ACTIVE_STREAM_KEY, it.streamId) }
             }
             is Resource.Error ->{
                 _streamTokenStatus.emit(STREAM_TOKEN_STATUS_IDLE)
@@ -81,8 +82,8 @@ class StreamRepo @Inject constructor(
 
     suspend fun stopStream(){
         _stopStreamOutput.emit(Resource.Loading())
-        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-        token = DUMMY_STREAMER_TOKEN
+        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+//        token = DUMMY_STREAMER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _stopStreamOutput.emit(Resource.Error(message = "token Invalid"))

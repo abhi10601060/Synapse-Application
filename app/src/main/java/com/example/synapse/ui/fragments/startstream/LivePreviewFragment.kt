@@ -37,8 +37,11 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
     private lateinit var thumbNailPreview : ImageView
     private lateinit var thumbnailPath : TextView
     private lateinit var titleEdt : EditText
+    private lateinit var descEdt : EditText
+    private lateinit var tagsEdt : EditText
     private lateinit var navController : NavController
     private lateinit var  resultLauncher : ActivityResultLauncher<Intent>
+    private var thumbNailBase64 : String? = ""
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -54,9 +57,16 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     private fun setOnClicks() {
         startStreamBtn.setOnClickListener(View.OnClickListener {
+            if (titleEdt.text.toString().isNullOrBlank()){
+                titleEdt.error = "title can not be empty"
+                return@OnClickListener
+            }
             val text = titleEdt.text.toString()
             val bundle = Bundle()
-            bundle.putString("name", text)
+            bundle.putString("title", text)
+            bundle.putString("thumbnail", thumbNailBase64)
+            bundle.putString("desc", descEdt.text.toString())
+            bundle.putString("tags", tagsEdt.text.toString())
             navController.navigate(R.id.action_livePreviewFragment_to_liveFragment, bundle)
         })
 
@@ -80,8 +90,8 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
                 val thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(picturePath),thumbnailSize, thumbnailSize)
                 thumbnailPath.text = picturePath
                 thumbNailPreview.setImageBitmap(thumbnail)
-                val base64Image = getBase64FromBitmap(thumbnail)
-                Log.d(TAG, "registerResultLauncher: base64Image : $base64Image")
+                thumbNailBase64 = getBase64FromBitmap(thumbnail)
+                Log.d(TAG, "registerResultLauncher: base64Image : $thumbNailBase64")
             }catch (e : Exception){
                 Log.d(TAG, "registerResultLauncher: eexception : ${e}")
             }
@@ -93,7 +103,7 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
 
-        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP)
     }
 
     @SuppressLint("Recycle")
@@ -116,6 +126,8 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
 
     private fun createView(view: View) {
         titleEdt = view.findViewById(R.id.livePreviewStreamTitleEdt)
+        tagsEdt = view.findViewById(R.id.livePreviewTagEdt)
+        descEdt = view.findViewById(R.id.livePreviewDescEdt)
         startStreamBtn = view.findViewById(R.id.livePreviewStartStreamBtn)
         browseThumbnailBtn = view.findViewById(R.id.livePreviewBrowseBtn)
         thumbNailPreview = view.findViewById(R.id.liveStreamThumbnailImg)

@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.model.req.StartStreamInput
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.StreamRepo
 import com.google.gson.Gson
@@ -190,11 +191,11 @@ class StreamViewModel @Inject constructor(
         }
     }
 
-    fun startLive(roomName : String){
+    fun startLive(streaminfo : StartStreamInput ){
         isScreenCaptureRequest = false
         viewModelScope.launch(Dispatchers.IO) {
             _streamStatus.emit(STREAM_STATUS_GOING_LIVE)
-            streamRepo.startStream(roomName)
+            streamRepo.startStream(streaminfo)
         }
     }
 
@@ -203,7 +204,7 @@ class StreamViewModel @Inject constructor(
         this.mediaProjectionIntent = mediaProjectionIntent
         viewModelScope.launch(Dispatchers.IO) {
             _streamStatus.emit(STREAM_STATUS_GOING_LIVE)
-            streamRepo.startStream(roomName)
+//            streamRepo.startStream(roomName)
         }
     }
 

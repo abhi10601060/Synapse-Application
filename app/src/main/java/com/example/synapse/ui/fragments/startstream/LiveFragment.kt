@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.model.req.StartStreamInput
 import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.viemodel.StreamViewModel
 import com.google.gson.Gson
@@ -40,7 +41,11 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
     private lateinit var chatBox : CustomChatBox
     @Inject lateinit var gson : Gson
 
-    private var name : String? = null
+    private var title : String? = null
+    private var desc : String = ""
+    private var thumbnail : String = ""
+    private var tags : String = ""
+    private var toSave : String? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,16 +57,20 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
             activity?.let { LiveKit.create(it.applicationContext) })
 
         arguments?.let {
-            name = it.getString("name")
-            Log.d(TAG, "onViewCreated: received name : $name")
-            if (name != null) {
-                if (isPermissionsGranted()){
-                    streamViewModel.startLive(name!!)
-                }
-                else{
-                    askPermissions()
-                }
-            }
+            title = it.getString("title")
+            desc = it.getString("desc").toString()
+            tags = it.getString("tags").toString()
+            thumbnail = it.getString("thumbnail").toString()
+
+            Log.d(TAG, "onViewCreated: received name : $title, desc: $desc, tags: $tags")
+//            if (title != null) {
+//                if (isPermissionsGranted()){
+//                    streamViewModel.startLive(StartStreamInput(title!!, desc, tags, thumbnail, false))
+//                }
+//                else{
+//                    askPermissions()
+//                }
+//            }
         }
 
         chatEdt.setOnEditorActionListener{_,actionId,_ ->

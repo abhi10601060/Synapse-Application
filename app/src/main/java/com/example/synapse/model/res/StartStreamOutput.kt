@@ -6,5 +6,7 @@ data class StartStreamOutput(
     @SerializedName("message")
     val message : String?,
     @SerializedName("token")
-    val streamerRoomToken : String?
+    val streamerRoomToken : String?,
+    @SerializedName("streamId")
+    val streamId : String
 )
