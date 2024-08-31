@@ -6,6 +6,8 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -16,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.ui.custom.CustomChatBox
+import com.example.synapse.util.slideDown
 import com.example.synapse.viemodel.WatchStreamViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,6 +43,9 @@ class WatchStream : AppCompatActivity() {
     private lateinit var chatEdt : EditText
     private lateinit var streamName : String
     private lateinit var chatBox: CustomChatBox
+    private lateinit var openLiveChat : RelativeLayout
+    private lateinit var chatBoxParentRL : RelativeLayout
+    private lateinit var closeLiveChat : ImageView
     @Inject lateinit var gson : Gson
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,13 +60,13 @@ class WatchStream : AppCompatActivity() {
         }
         createView()
         setOnClicks()
-        setLiveChatListener()
-        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
-
-        intent?.let {
-            streamName = it.getStringExtra("name").toString()
-            Log.d(TAG, "onCreate: incoming stream is : $streamName")
-        }
+//        setLiveChatListener()
+//        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
+//
+//        intent?.let {
+//            streamName = it.getStringExtra("name").toString()
+//            Log.d(TAG, "onCreate: incoming stream is : $streamName")
+//        }
 
         chatEdt.setOnEditorActionListener{_,actionId,_ ->
             if (actionId == EditorInfo.IME_ACTION_SEND){
@@ -92,22 +98,36 @@ class WatchStream : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart: called")
-        watchStreamViewModel.watchStream(streamName)
+//        watchStreamViewModel.watchStream(streamName)
     }
 
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause: called")
-        watchStreamViewModel.closeStream()
+//        watchStreamViewModel.closeStream()
     }
 
     private fun setOnClicks() {
+        openLiveChat.setOnClickListener(View.OnClickListener {
+            openLiveChat.visibility = View.GONE
+            chatBoxParentRL.visibility = View.VISIBLE
+            chatBoxParentRL.slideDown(300, 0)
+            closeLiveChat.visibility = View.VISIBLE
+        })
 
+        closeLiveChat.setOnClickListener(View.OnClickListener {
+            chatBoxParentRL.visibility = View.GONE
+            openLiveChat.visibility = View.VISIBLE
+            closeLiveChat.visibility = View.GONE
+        })
     }
 
     private fun createView() {
         surfaceViewRenderer = findViewById(R.id.watchStreamSurface)
         chatEdt = findViewById(R.id.watchStreamChatEdt)
         chatBox = findViewById(R.id.watchStreamChatBox)
+        openLiveChat = findViewById(R.id.watchStreamOpenLiveChatRL)
+        chatBoxParentRL = findViewById(R.id.watchStreamChatBoxParentRL)
+        closeLiveChat = findViewById(R.id.closeLiveChatImg)
     }
 }

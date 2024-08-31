@@ -79,7 +79,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
 
     private fun setOnClicks() {
         refreshBtn.setOnClickListener(View.OnClickListener {
-            mainViewModel.getAllActiveStreams()
+//            mainViewModel.getAllActiveStreams()
+            val intent = Intent(context, WatchStream::class.java)
+            startActivity(intent)
         })
     }
 
