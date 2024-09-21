@@ -3,6 +3,7 @@ package com.example.synapse.repo
 import android.util.Log
 import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.req.LikeDislikeInput
+import com.example.synapse.model.req.SubscribeUnsubscribeInput
 import com.example.synapse.model.res.ResponseMessageOutput
 import com.example.synapse.model.res.StartStreamOutput
 import com.example.synapse.model.res.WatchStreamOutput
@@ -31,6 +32,10 @@ class WatchStreamRepo @Inject constructor(
     val likeDisLikeStreamOutput : StateFlow<Int>
         get() = _likeDislikeStreamOutput
 
+    private val _subUnSubOutput = MutableStateFlow(0)
+    val subUnSubOutput : StateFlow<Int>
+        get() = _subUnSubOutput
+
 //    private val _removeLikeOfStreamOutput = MutableStateFlow<Resource<ResponseMessageOutput>>(Resource.Idle())
 //    val removeLikeOfStreamOutput : StateFlow<Resource<ResponseMessageOutput>>
 //        get() = _removeLikeOfStreamOutput
@@ -46,7 +51,6 @@ class WatchStreamRepo @Inject constructor(
     suspend fun watchStream(streamName : String){
         _watchStreamOutput.emit(Resource.Loading())
         var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-//        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
@@ -72,7 +76,6 @@ class WatchStreamRepo @Inject constructor(
 
     suspend fun likeStream(likeStreamInput : LikeDislikeInput){
         var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-//        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
             Log.d("TAG", "startStream: token is Empty")
             _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
@@ -92,7 +95,6 @@ class WatchStreamRepo @Inject constructor(
 
     suspend fun removeLikeOfStream(removeLikeStreamInput : LikeDislikeInput){
         var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-//        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
             Log.d("TAG", "removeLikeStream: token is Empty")
             _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
@@ -112,7 +114,6 @@ class WatchStreamRepo @Inject constructor(
 
     suspend fun dislikeStream(disLikeInput : LikeDislikeInput) {
         var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-//        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
             Log.d("TAG", "removeLikeStream: token is Empty")
             _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
@@ -132,7 +133,6 @@ class WatchStreamRepo @Inject constructor(
 
     suspend fun removeDislikeStream(removeDisLikeInput : LikeDislikeInput) {
         var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
-//        token = DUMMY_VIEWER_TOKEN
         if (token == null) {
             Log.d("TAG", "removeLikeStream: token is Empty")
             _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
@@ -157,4 +157,46 @@ class WatchStreamRepo @Inject constructor(
         Log.d(TAG, "handleLikeDislikeResponse: response in null")
         return 0
     }
+
+    suspend fun subscribeStreamer(subscribeUnsubscribeInput: SubscribeUnsubscribeInput){
+        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        if (token == null) {
+            Log.d("TAG", "removeLikeStream: token is Empty")
+            _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
+            return
+        }
+        val res = synapseService.subscribeStreamer(token, subscribeUnsubscribeInput)
+        val resource = handleSubUnSubResponse(res)
+
+        if (resource == 1){
+            _subUnSubOutput.emit(11)
+        }else{
+            _subUnSubOutput.emit(10)
+        }
+    }
+    suspend fun unsubscribeStreamer(subscribeUnsubscribeInput: SubscribeUnsubscribeInput){
+        var token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        if (token == null) {
+            Log.d("TAG", "removeLikeStream: token is Empty")
+            _watchStreamOutput.emit(Resource.Error(message = "token Invalid"))
+            return
+        }
+        val res = synapseService.unsubscribeStreamer(token, subscribeUnsubscribeInput)
+        val resource = handleSubUnSubResponse(res)
+
+        if (resource == 1){
+            _subUnSubOutput.emit(-11)
+        }else{
+            _subUnSubOutput.emit(-10)
+        }
+    }
+
+    private fun handleSubUnSubResponse(res : Response<ResponseMessageOutput>): Int {
+        if (res.isSuccessful && res.body() != null){
+            return 1
+        }
+        Log.d(TAG, "handleLikeDislikeResponse: response in null")
+        return 0
+    }
+
 }

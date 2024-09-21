@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.model.req.LikeDislikeInput
+import com.example.synapse.model.req.SubscribeUnsubscribeInput
 import com.example.synapse.model.res.Stream
 import com.example.synapse.network.Resource
 import com.example.synapse.ui.custom.CustomChatBox
@@ -61,6 +62,7 @@ class WatchStream : AppCompatActivity() {
     private lateinit var disLikeImg : ImageView
     private lateinit var loadingStreamRL : RelativeLayout
     private lateinit var loadinStreamThumbnail : ImageView
+    private lateinit var subscribeBtn : Button
 
     private lateinit var incomingStream : Stream
 
@@ -82,8 +84,8 @@ class WatchStream : AppCompatActivity() {
         createView()
         setOnClicks()
         setStreamActionListeners()
-        setLiveChatListener()
-        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
+//        setLiveChatListener()
+//        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
 
         intent?.let {
             incomingStreamJson = it.getStringExtra("stream").toString()
@@ -148,6 +150,28 @@ class WatchStream : AppCompatActivity() {
                 }
             }
         }
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            watchStreamViewModel.subUnSubStatus.collect{status ->
+                when(status){
+                    10 ->{
+                        Toast.makeText(this@WatchStream, "error in subscribing streamer", Toast.LENGTH_SHORT).show()
+                    }
+                    11 ->{
+                        subscribeBtn.text = "Unsubscribe"
+                    }
+                    -10 ->{
+                        Toast.makeText(this@WatchStream, "error in un-subscribing streamer", Toast.LENGTH_SHORT).show()
+                    }
+                    -11 ->{
+                        subscribeBtn.text = "Subscribe"
+                    }
+                    else ->{
+
+                    }
+                }
+            }
+        }
     }
 
     private fun setStreamData(stream: Stream) {
@@ -178,13 +202,13 @@ class WatchStream : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart: called")
-        watchStreamViewModel.watchStream(incomingStream.streamId)
+//        watchStreamViewModel.watchStream(incomingStream.streamId)
     }
 
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause: called")
-        watchStreamViewModel.closeStream()
+//        watchStreamViewModel.closeStream()
     }
 
     private fun setOnClicks() {
@@ -229,6 +253,15 @@ class WatchStream : AppCompatActivity() {
                 watchStreamViewModel.dislikeStream(likeDislikeInput)
             }
         })
+
+        subscribeBtn.setOnClickListener(View.OnClickListener {
+            val status = watchStreamViewModel.subUnSubStatus.value
+            if (status == -10 || status == 11){
+                watchStreamViewModel.unsubscribeStreamer(SubscribeUnsubscribeInput(incomingStream.streamerId))
+            }else{
+                watchStreamViewModel.subscribeStreamer((SubscribeUnsubscribeInput(incomingStream.streamerId)))
+            }
+        })
     }
 
     private fun createView() {
@@ -248,5 +281,6 @@ class WatchStream : AppCompatActivity() {
         streamerProfilePic = findViewById(R.id.watchStreamStreamerProfilePicImg)
         loadingStreamRL = findViewById(R.id.watchStreamLoadingThumbnailRL)
         loadinStreamThumbnail = findViewById(R.id.watchStreamLoadingThumbnailImg)
+        subscribeBtn = findViewById(R.id.watchStreamSubscribeBtn)
     }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.model.req.LikeDislikeInput
+import com.example.synapse.model.req.SubscribeUnsubscribeInput
 import com.example.synapse.model.res.ResponseMessageOutput
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.WatchStreamRepo
@@ -196,6 +197,9 @@ class WatchStreamViewModel @Inject constructor(
     val likeStreamOutput : StateFlow<Int>
         get() = watchStreamRepo.likeDisLikeStreamOutput
 
+    val subUnSubStatus : StateFlow<Int>
+        get() = watchStreamRepo.subUnSubOutput
+
     fun likeStream(likeInput: LikeDislikeInput){
         viewModelScope.launch(Dispatchers.IO) {
             watchStreamRepo.likeStream(likeInput)
@@ -215,6 +219,17 @@ class WatchStreamViewModel @Inject constructor(
     fun removeDislikeOfStream(likeDislikeInput: LikeDislikeInput){
         viewModelScope.launch(Dispatchers.IO) {
             watchStreamRepo.removeDislikeStream(likeDislikeInput)
+        }
+    }
+
+    fun subscribeStreamer(subscribeUnsubscribeInput: SubscribeUnsubscribeInput){
+        viewModelScope.launch(Dispatchers.IO) {
+            watchStreamRepo.subscribeStreamer(subscribeUnsubscribeInput)
+        }
+    }
+    fun unsubscribeStreamer(subscribeUnsubscribeInput: SubscribeUnsubscribeInput){
+        viewModelScope.launch(Dispatchers.IO) {
+            watchStreamRepo.unsubscribeStreamer(subscribeUnsubscribeInput)
         }
     }
 }
