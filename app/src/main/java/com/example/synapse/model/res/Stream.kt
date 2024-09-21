@@ -11,7 +11,7 @@ data class Stream(
     @SerializedName("status") val status : String,
     @SerializedName("savedStreamUrl") val savedStreamUrl : String,
     @SerializedName("likes") val likes : Int,
-    @SerializedName("dislikes") val dislikes : String,
+    @SerializedName("dislikes") val dislikes : Int,
     @SerializedName("thumbNailUrl") val thumbNailUrl : String,
     @SerializedName("createdOn") val createdOn : String,
     @SerializedName("endedOn") val endedOn : String,

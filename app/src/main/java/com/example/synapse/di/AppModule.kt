@@ -41,7 +41,7 @@ class AppModule {
     @Provides
     @Singleton
     fun getRetroInstance() : Retrofit{
-        val url = "http://ec2-3-110-103-111.ap-south-1.compute.amazonaws.com:8010/"
+        val url = "http://ec2-15-207-117-224.ap-south-1.compute.amazonaws.com:8010/"
 
         val intercepter = HttpLoggingInterceptor().apply {
             this.level = HttpLoggingInterceptor.Level.BODY

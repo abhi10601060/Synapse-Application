@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.model.req.LikeDislikeInput
+import com.example.synapse.model.res.ResponseMessageOutput
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.WatchStreamRepo
 import com.google.gson.Gson
@@ -187,5 +189,32 @@ class WatchStreamViewModel @Inject constructor(
         Log.d(TAG, "attachVideo: called for watch video")
         surfaceViewRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
         track.addRenderer(surfaceViewRenderer)
+    }
+
+    //*************************************************************** Stream Actions **********************************************
+
+    val likeStreamOutput : StateFlow<Int>
+        get() = watchStreamRepo.likeDisLikeStreamOutput
+
+    fun likeStream(likeInput: LikeDislikeInput){
+        viewModelScope.launch(Dispatchers.IO) {
+            watchStreamRepo.likeStream(likeInput)
+        }
+    }
+
+    fun removeLikeOfStream(likeDislikeInput: LikeDislikeInput){
+        viewModelScope.launch(Dispatchers.IO) {
+            watchStreamRepo.removeLikeOfStream(likeDislikeInput)
+        }
+    }
+    fun dislikeStream(likeDislikeInput: LikeDislikeInput){
+        viewModelScope.launch(Dispatchers.IO) {
+            watchStreamRepo.dislikeStream(likeDislikeInput)
+        }
+    }
+    fun removeDislikeOfStream(likeDislikeInput: LikeDislikeInput){
+        viewModelScope.launch(Dispatchers.IO) {
+            watchStreamRepo.removeDislikeStream(likeDislikeInput)
+        }
     }
 }

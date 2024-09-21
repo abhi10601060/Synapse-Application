@@ -9,14 +9,19 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.model.req.LikeDislikeInput
+import com.example.synapse.model.res.Stream
+import com.example.synapse.network.Resource
 import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.util.slideDown
 import com.example.synapse.viemodel.WatchStreamViewModel
@@ -41,11 +46,27 @@ class WatchStream : AppCompatActivity() {
 
     private lateinit var surfaceViewRenderer: SurfaceViewRenderer
     private lateinit var chatEdt : EditText
-    private lateinit var streamName : String
+    private lateinit var incomingStreamJson : String
     private lateinit var chatBox: CustomChatBox
     private lateinit var openLiveChat : RelativeLayout
     private lateinit var chatBoxParentRL : RelativeLayout
     private lateinit var closeLiveChat : ImageView
+    private lateinit var streamTitle : TextView
+    private lateinit var streamStartTime : TextView
+    private lateinit var streamerName : TextView
+    private lateinit var streamerProfilePic : ImageView
+    private lateinit var likesCount : TextView
+    private lateinit var disLikesCount : TextView
+    private lateinit var likeImg : ImageView
+    private lateinit var disLikeImg : ImageView
+    private lateinit var loadingStreamRL : RelativeLayout
+    private lateinit var loadinStreamThumbnail : ImageView
+
+    private lateinit var incomingStream : Stream
+
+    private var isLiked = false
+    private var isDisliked = false
+
     @Inject lateinit var gson : Gson
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,13 +81,17 @@ class WatchStream : AppCompatActivity() {
         }
         createView()
         setOnClicks()
-//        setLiveChatListener()
-//        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
-//
-//        intent?.let {
-//            streamName = it.getStringExtra("name").toString()
-//            Log.d(TAG, "onCreate: incoming stream is : $streamName")
-//        }
+        setStreamActionListeners()
+        setLiveChatListener()
+        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
+
+        intent?.let {
+            incomingStreamJson = it.getStringExtra("stream").toString()
+            Log.d(TAG, "onCreate: incoming stream json is : $incomingStreamJson")
+            incomingStream = gson.fromJson(incomingStreamJson, Stream::class.java)
+            Log.d(TAG, "onCreate: incoming stream is : $incomingStream")
+            setStreamData(incomingStream)
+        }
 
         chatEdt.setOnEditorActionListener{_,actionId,_ ->
             if (actionId == EditorInfo.IME_ACTION_SEND){
@@ -79,6 +104,61 @@ class WatchStream : AppCompatActivity() {
             }
             return@setOnEditorActionListener false
         }
+    }
+
+    private fun setStreamActionListeners() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            watchStreamViewModel.likeStreamOutput.collect{
+                when(it){
+                    11 ->{
+                        likeImg.setImageResource(R.drawable.solid_thumb_up)
+                        likesCount.text = (incomingStream.likes + 1).toString()
+                    }
+                    10 ->{
+                        Toast.makeText(baseContext, "error in like", Toast.LENGTH_SHORT).show()
+                        likeImg.setImageResource(R.drawable.outline_thumb)
+                    }
+                    -11 ->{
+                        likeImg.setImageResource(R.drawable.outline_thumb)
+                        likesCount.text = incomingStream.likes.toString()
+                    }
+                    -10 ->{
+                        Toast.makeText(baseContext, "error in remove like", Toast.LENGTH_SHORT).show()
+                        likeImg.setImageResource(R.drawable.solid_thumb_up)
+                    }
+                    21 ->{
+                        disLikeImg.setImageResource(R.drawable.solid_thumb_down)
+                        disLikesCount.text = (incomingStream.dislikes +1).toString()
+                    }
+                    20 ->{
+                        Log.d(TAG, "setStreamActionListeners: error in dislike")
+                        disLikeImg.setImageResource(R.drawable.outline_thumb_down)
+                    }
+                    -21 ->{
+                        disLikeImg.setImageResource(R.drawable.outline_thumb_down)
+                        disLikesCount.text = incomingStream.dislikes.toString()
+                    }
+                    -20 ->{
+                        Log.d(TAG, "setStreamActionListeners: error in remove dislike")
+                        disLikeImg.setImageResource(R.drawable.solid_thumb_down)
+                    }
+                    else ->{
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setStreamData(stream: Stream) {
+        streamTitle.text = stream.title
+        likesCount.text = stream.likes.toString()
+        disLikesCount.text = stream.dislikes.toString()
+        streamerName.text = stream.streamerId
+        streamStartTime.text = stream.createdOn
+        Glide.with(this)
+            .load(stream.thumbNailUrl)
+            .into(loadinStreamThumbnail)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -98,13 +178,13 @@ class WatchStream : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart: called")
-//        watchStreamViewModel.watchStream(streamName)
+        watchStreamViewModel.watchStream(incomingStream.streamId)
     }
 
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause: called")
-//        watchStreamViewModel.closeStream()
+        watchStreamViewModel.closeStream()
     }
 
     private fun setOnClicks() {
@@ -120,6 +200,35 @@ class WatchStream : AppCompatActivity() {
             openLiveChat.visibility = View.VISIBLE
             closeLiveChat.visibility = View.GONE
         })
+
+        likeImg.setOnClickListener(View.OnClickListener {
+            val likeDislikeInput = LikeDislikeInput(incomingStream.streamId)
+            if (isDisliked){
+                watchStreamViewModel.removeDislikeOfStream(likeDislikeInput)
+            }
+            if (isLiked){
+                isLiked = !isLiked
+                watchStreamViewModel.removeLikeOfStream(likeDislikeInput)
+            }else{
+                isLiked = !isLiked
+                watchStreamViewModel.likeStream(likeDislikeInput)
+            }
+        })
+
+        disLikeImg.setOnClickListener(View.OnClickListener {
+            val likeDislikeInput = LikeDislikeInput(incomingStream.streamId)
+            if (isLiked){
+                watchStreamViewModel.removeLikeOfStream(likeDislikeInput)
+            }
+            if (isDisliked){
+                isDisliked = !isDisliked
+                watchStreamViewModel.removeDislikeOfStream(likeDislikeInput)
+            }
+            else{
+                isDisliked = !isDisliked
+                watchStreamViewModel.dislikeStream(likeDislikeInput)
+            }
+        })
     }
 
     private fun createView() {
@@ -129,5 +238,15 @@ class WatchStream : AppCompatActivity() {
         openLiveChat = findViewById(R.id.watchStreamOpenLiveChatRL)
         chatBoxParentRL = findViewById(R.id.watchStreamChatBoxParentRL)
         closeLiveChat = findViewById(R.id.closeLiveChatImg)
+        streamTitle = findViewById(R.id.watchStreamTitleTxt)
+        streamStartTime = findViewById(R.id.watchStreamTime)
+        streamerName = findViewById(R.id.watchStreamStreamerName)
+        likesCount = findViewById(R.id.watchStreamLikeTxt)
+        disLikesCount = findViewById(R.id.watchStreamDislikeTxt)
+        likeImg = findViewById(R.id.watchStreamLikeImg)
+        disLikeImg = findViewById(R.id.watchStreamDisLikeImg)
+        streamerProfilePic = findViewById(R.id.watchStreamStreamerProfilePicImg)
+        loadingStreamRL = findViewById(R.id.watchStreamLoadingThumbnailRL)
+        loadinStreamThumbnail = findViewById(R.id.watchStreamLoadingThumbnailImg)
     }
 }

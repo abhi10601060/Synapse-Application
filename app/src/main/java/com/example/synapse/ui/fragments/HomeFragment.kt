@@ -16,6 +16,7 @@ import com.example.synapse.network.Resource
 import com.example.synapse.ui.activities.WatchStream
 import com.example.synapse.ui.adapters.ActiveStreamsAdapter
 import com.example.synapse.viemodel.MainViewModel
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,9 +80,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
 
     private fun setOnClicks() {
         refreshBtn.setOnClickListener(View.OnClickListener {
-//            mainViewModel.getAllActiveStreams()
-            val intent = Intent(context, WatchStream::class.java)
-            startActivity(intent)
+            mainViewModel.getAllActiveStreams()
         })
     }
 
@@ -91,9 +90,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
     }
 
     override fun onStreamClicked(stream: Stream) {
+        val gson = Gson()
         val intent = Intent(activity, WatchStream::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra("name" , stream.title)
+        intent.putExtra("stream" , gson.toJson(stream))
         startActivity(intent)
     }
 }

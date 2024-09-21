@@ -14,7 +14,28 @@
         android:layout_height="300dp"
         >
 
+        <RelativeLayout
+            android:id="@+id/watchStreamLoadingThumbnailRL"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/watchStreamLoadingThumbnailImg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@color/black"/>
+
+            <ProgressBar
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerInParent="true"
+                android:indeterminateTint="@color/white"
+               />
+
+        </RelativeLayout>
+
         <io.livekit.android.renderer.SurfaceViewRenderer
+            android:visibility="invisible"
             android:id="@+id/watchStreamSurface"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,7 +52,7 @@
         android:padding="10dp">
 
         <TextView
-            android:id="@+id/watchStreamTitle"
+            android:id="@+id/watchStreamTitleTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Watch Black Myth Wukang | With the Exceptional Gameplay | Live Stream and Give Away"
@@ -46,7 +67,7 @@
             android:id="@+id/watchStreamTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/watchStreamTitle"
+            android:layout_below="@+id/watchStreamTitleTxt"
             android:layout_marginTop="5dp"
             android:textSize="15sp"
             android:textColor="@color/grey"

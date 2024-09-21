@@ -1,5 +1,6 @@
 package com.example.synapse.network
 
+import com.example.synapse.model.req.LikeDislikeInput
 import com.example.synapse.model.req.StopStreamInput
 import com.example.synapse.model.req.StartStreamInput
 import com.example.synapse.model.req.UpdateBioInput
@@ -7,6 +8,7 @@ import com.example.synapse.model.req.UpdateProfilePicInput
 import com.example.synapse.model.res.WatchStreamOutput
 import com.example.synapse.model.res.AllActiveStreamOutput
 import com.example.synapse.model.res.ProfileDetailsOutPut
+import com.example.synapse.model.res.ResponseMessageOutput
 import com.example.synapse.model.res.StopStreamOutput
 import com.example.synapse.model.res.StartStreamOutput
 import com.example.synapse.model.res.UpdateProfileOutput
@@ -70,4 +72,34 @@ interface SynapseService {
         @Header("Authentication-Token") token: String,
         @Body bio : UpdateBioInput
     ) : Response<UpdateProfileOutput>
+
+    //************************************************ Stream Actions **********************************************************
+
+    @POST("stream/like")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun likeStream(
+        @Header("Authentication-Token") token: String,
+        @Body likeInput : LikeDislikeInput
+    ) : Response<ResponseMessageOutput>
+
+    @POST("stream/dislike")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun dislikeStream(
+        @Header("Authentication-Token") token: String,
+        @Body dislikeInput : LikeDislikeInput
+    ) : Response<ResponseMessageOutput>
+
+    @POST("stream/remove-like")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun removeLikeOfStream(
+        @Header("Authentication-Token") token: String,
+        @Body removeLikeInput : LikeDislikeInput
+    ) : Response<ResponseMessageOutput>
+
+    @POST("stream/remove-dislike")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun removeDislikeOfStream(
+        @Header("Authentication-Token") token: String,
+        @Body removeDislikeInput : LikeDislikeInput
+    ) : Response<ResponseMessageOutput>
 }
