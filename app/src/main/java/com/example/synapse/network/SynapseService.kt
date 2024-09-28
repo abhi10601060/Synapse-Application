@@ -12,6 +12,7 @@ import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.ResponseMessageOutput
 import com.example.synapse.model.res.StopStreamOutput
 import com.example.synapse.model.res.StartStreamOutput
+import com.example.synapse.model.res.SubscriptionsOutput
 import com.example.synapse.model.res.UpdateProfileOutput
 import retrofit2.Response
 import retrofit2.http.Body
@@ -117,5 +118,14 @@ interface SynapseService {
         @Header("Authentication-Token") token: String,
         @Body subscribeUnsubscribeInput: SubscribeUnsubscribeInput
     ) : Response<ResponseMessageOutput>
+
+
+    //************************************************ Subscriptions *****************************************************************
+
+    @GET("user/subscribers")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun getAllSubscriptions(
+        @Header("Authentication-Token") token: String
+    ) : Response<SubscriptionsOutput>
 
 }
