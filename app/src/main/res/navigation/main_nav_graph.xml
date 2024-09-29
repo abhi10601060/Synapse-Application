@@ -19,5 +19,14 @@
     <fragment
         android:id="@+id/mainMenuSubs"
         android:name="com.example.synapse.ui.fragments.SubscriptionFragment"
-        android:label="SubscriptionFragment" />
+        android:label="SubscriptionFragment" >
+        <action
+            android:id="@+id/action_mainMenuSubs_to_profileDetailsFragment"
+            app:launchSingleTop="true"
+            app:destination="@id/profileDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileDetailsFragment"
+        android:name="com.example.synapse.ui.fragments.ProfileDetailsFragment"
+        android:label="ProfileDetailsFragment" />
 </navigation>

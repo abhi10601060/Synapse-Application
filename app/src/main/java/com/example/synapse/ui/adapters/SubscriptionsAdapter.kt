@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide
 import com.example.synapse.R
 import com.example.synapse.model.data.Subscription
 
-class SubscriptionsAdapter(private val context: Context) : ListAdapter<Subscription, SubscriptionsAdapter.MyViewHolder>(MyDiffUtil()) {
+class SubscriptionsAdapter(private val context: Context, private val onProfileClick:(Subscription) -> Unit) : ListAdapter<Subscription, SubscriptionsAdapter.MyViewHolder>(MyDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.subscription_profile_layout , parent, false)
@@ -33,6 +33,10 @@ class SubscriptionsAdapter(private val context: Context) : ListAdapter<Subscript
         holder.name.text = subscription.id
 
         if (subscription.status.equals("live")) holder.liveIndicator.visibility = View.VISIBLE
+
+        holder.profilePic.setOnClickListener(View.OnClickListener {
+            onProfileClick(subscription)
+        })
     }
 
     class MyViewHolder(itemView: View) : ViewHolder(itemView){
