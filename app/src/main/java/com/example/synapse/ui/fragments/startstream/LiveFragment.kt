@@ -50,28 +50,28 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createView(view)
-//        setLiveChatListener()
-//        setOnClicks()
-//
-//        streamViewModel.init(streamSurfaceViewRenderer,
-//            activity?.let { LiveKit.create(it.applicationContext) })
-//
-//        arguments?.let {
-//            title = it.getString("title")
-//            desc = it.getString("desc").toString()
-//            tags = it.getString("tags").toString()
-//            thumbnail = it.getString("thumbnail").toString()
-//
-//            Log.d(TAG, "onViewCreated: received name : $title, desc: $desc, tags: $tags")
-//            if (title != null) {
-//                if (isPermissionsGranted()){
-//                    streamViewModel.startLive(StartStreamInput(title!!, desc, tags, thumbnail, false))
-//                }
-//                else{
-//                    askPermissions()
-//                }
-//            }
-//        }
+        setLiveChatListener()
+        setOnClicks()
+
+        streamViewModel.init(streamSurfaceViewRenderer,
+            activity?.let { LiveKit.create(it.applicationContext) })
+
+        arguments?.let {
+            title = it.getString("title")
+            desc = it.getString("desc").toString()
+            tags = it.getString("tags").toString()
+            thumbnail = it.getString("thumbnail").toString()
+
+            Log.d(TAG, "onViewCreated: received name : $title, desc: $desc, tags: $tags")
+            if (title != null) {
+                if (isPermissionsGranted()){
+                    streamViewModel.startLive(StartStreamInput(title!!, desc, tags, thumbnail, false))
+                }
+                else{
+                    askPermissions()
+                }
+            }
+        }
 
         chatEdt.setOnEditorActionListener{_,actionId,_ ->
             if (actionId == EditorInfo.IME_ACTION_SEND){
