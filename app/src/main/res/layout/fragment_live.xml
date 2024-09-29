@@ -59,7 +59,7 @@
     <RelativeLayout
         android:id="@+id/liveChatBoxParent"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="270dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/highlited_rect"
         android:layout_marginHorizontal="20dp"

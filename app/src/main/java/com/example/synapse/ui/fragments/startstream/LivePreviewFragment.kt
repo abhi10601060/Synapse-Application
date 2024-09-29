@@ -23,6 +23,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.synapse.R
+import com.example.synapse.util.IntentLabel
+import com.example.synapse.util.IntentValue
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -32,6 +34,7 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
 
     private val TAG ="LivePreviewFragment"
 
+    private lateinit var destination : String
     private lateinit var startStreamBtn : Button
     private lateinit var browseThumbnailBtn : Button
     private lateinit var thumbNailPreview : ImageView
@@ -42,6 +45,7 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
     private lateinit var navController : NavController
     private lateinit var  resultLauncher : ActivityResultLauncher<Intent>
     private var thumbNailBase64 : String? = ""
+
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,6 +55,11 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
         registerResultLauncher()
 
         navController = findNavController()
+
+        val bundle = arguments
+        bundle?.let {
+            destination = bundle.getString(IntentLabel.START_STREAM_DESTINATION).toString()
+        }
 
     }
 
@@ -67,7 +76,12 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
             bundle.putString("thumbnail", thumbNailBase64)
             bundle.putString("desc", descEdt.text.toString())
             bundle.putString("tags", tagsEdt.text.toString())
-            navController.navigate(R.id.action_livePreviewFragment_to_liveFragment, bundle)
+            if (destination.equals(IntentValue.START_STREAM_LIVE)){
+                navController.navigate(R.id.action_livePreviewFragment_to_liveFragment, bundle)
+            }
+            else{
+                navController.navigate(R.id.action_livePreviewFragment_to_screenCaptureFragment, bundle)
+            }
         })
 
         browseThumbnailBtn.setOnClickListener(View.OnClickListener {

@@ -44,19 +44,19 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createView(view)
-        setLiveChatListener()
-        setOnClicks()
-
-        streamViewModel.init(streamSurfaceViewRenderer,
-            activity?.let { LiveKit.create(it.applicationContext) })
-
-        arguments?.let {
-            name = it.getString("name")
-            Log.d(TAG, "onViewCreated: received name : $name")
-            if (name != null) {
-                askMediaProjectionPermission()
-            }
-        }
+//        setLiveChatListener()
+//        setOnClicks()
+//
+//        streamViewModel.init(streamSurfaceViewRenderer,
+//            activity?.let { LiveKit.create(it.applicationContext) })
+//
+//        arguments?.let {
+//            name = it.getString("name")
+//            Log.d(TAG, "onViewCreated: received name : $name")
+//            if (name != null) {
+//                askMediaProjectionPermission()
+//            }
+//        }
 
         chatEdt.setOnEditorActionListener{_,actionId,_ ->
             if (actionId == EditorInfo.IME_ACTION_SEND){

@@ -21,6 +21,11 @@
             app:destination="@id/liveFragment"
             app:popUpTo="@id/livePreviewFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_livePreviewFragment_to_screenCaptureFragment"
+            app:destination="@id/screenCaptureFragment"
+            app:popUpTo="@id/livePreviewFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/screenCaptureDetailsFragment"
@@ -29,11 +34,6 @@
         <action
             android:id="@+id/action_screenCaptureDetailsFragment_to_livePreviewFragment"
             app:destination="@id/livePreviewFragment"
-            app:popUpTo="@id/screenCaptureDetailsFragment"
-            app:popUpToInclusive="true"/>
-        <action
-            android:id="@+id/action_screenCaptureDetailsFragment_to_screenCaptureFragment"
-            app:destination="@id/screenCaptureFragment"
             app:popUpTo="@id/screenCaptureDetailsFragment"
             app:popUpToInclusive="true"/>
     </fragment>

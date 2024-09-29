@@ -28,7 +28,7 @@ class ScreenCaptureDetailsFragment : Fragment(R.layout.fragment_screen_capture_d
             val text = titleEdt.text.toString()
             val bundle = Bundle()
             bundle.putString("name", text)
-            navController.navigate(R.id.action_screenCaptureDetailsFragment_to_screenCaptureFragment, bundle)
+//            navController.navigate(R.id.action_screenCaptureDetailsFragment_to_screenCaptureFragment, bundle)
         })
     }
 

@@ -14,7 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/BasicText"
-            android:text="You are Live"
+            android:text="You are Live screen"
             android:textSize="24dp"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"/>

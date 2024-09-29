@@ -32,18 +32,9 @@ class StartStream : AppCompatActivity() {
         val dest = intent.getStringExtra(IntentLabel.START_STREAM_DESTINATION)
         Log.d(TAG, "onCreate: destination is : $dest")
         dest?.let {
-            when(it){
-                IntentValue.START_STREAM_LIVE ->{
-                    navController.navigate(R.id.action_screenCaptureDetailsFragment_to_livePreviewFragment)
-
-                }
-                IntentValue.START_STREAM_SCREEN_CAPTURE ->{
-
-                }
-                else -> {
-
-                }
-            }
+            val bundle = Bundle()
+            bundle.putString(IntentLabel.START_STREAM_DESTINATION, dest)
+            navController.navigate(R.id.action_screenCaptureDetailsFragment_to_livePreviewFragment , bundle)
         }
     }
 }
