@@ -75,6 +75,10 @@ class MainRepo @Inject constructor(
     val subscriptions : StateFlow<Resource<SubscriptionsOutput>>
         get() = _subscriptions
 
+    private val _subscriptionStreams = MutableStateFlow<Resource<AllActiveStreamOutput>>(Resource.Idle())
+    val subscriptionStreams : StateFlow<Resource<AllActiveStreamOutput>>
+        get() = _subscriptionStreams
+
     suspend fun getAllSubscriptions(){
         val res = synapseService.getAllSubscriptions(token!!)
         _subscriptions.emit(handleSubscriptionsOutput(res))
@@ -86,5 +90,10 @@ class MainRepo @Inject constructor(
         }
         Log.d(TAG, "handleSubscriptionsOutput: error in getting all subscriptions body is null")
         return Resource.Error()
+    }
+
+    suspend fun getAllSubscriptionStreams() {
+        val res = synapseService.getAllActiveStreams(token!!)
+        _subscriptionStreams.emit(handleAllActiveStreams(res))
     }
 }

@@ -33,9 +33,18 @@ class MainViewModel @Inject constructor(
     val subscriptions : StateFlow<Resource<SubscriptionsOutput>>
         get() = mainRepo.subscriptions
 
+    val subscriptionStreams : StateFlow<Resource<AllActiveStreamOutput>>
+        get() = mainRepo.subscriptionStreams
+
     fun getAllSubscriptions(){
         viewModelScope.launch(Dispatchers.IO) {
             mainRepo.getAllSubscriptions()
+        }
+    }
+
+    fun getAllSubscriptionsStreams(){
+        viewModelScope.launch(Dispatchers.IO) {
+            mainRepo.getAllSubscriptionStreams()
         }
     }
 }

@@ -44,6 +44,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
     }
 
     private fun observeActiveStreams() {
+        mainViewModel.getAllActiveStreams()
+
          CoroutineScope(Dispatchers.IO).launch {
              mainViewModel.allActiveStreams.collect{
                  when(it) {
