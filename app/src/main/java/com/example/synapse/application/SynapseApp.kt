@@ -8,10 +8,7 @@ import javax.inject.Inject
 @HiltAndroidApp
 class SynapseApp : Application() {
 
-    @Inject lateinit var shredPrefUtil : SharedprefUtil
     override fun onCreate() {
         super.onCreate()
-
-        shredPrefUtil.addAbhiData()
     }
 }

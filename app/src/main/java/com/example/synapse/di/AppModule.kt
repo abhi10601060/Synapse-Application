@@ -3,7 +3,9 @@ package com.example.synapse.di
 import android.content.Context
 import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.DITest
+import com.example.synapse.network.AuthService
 import com.example.synapse.network.SynapseService
+import com.example.synapse.repo.AuthRepo
 import com.example.synapse.repo.MainRepo
 import com.example.synapse.repo.ProfileRepo
 import com.example.synapse.repo.StreamRepo
@@ -96,5 +98,36 @@ class AppModule {
     @Singleton
     fun getProfileRepository(synapseService: SynapseService, sharedprefUtil: SharedprefUtil) : ProfileRepo{
         return ProfileRepo(synapseService, sharedprefUtil)
+    }
+
+    @Provides
+    @Singleton
+    fun getAuthService() : AuthService{
+        val url = "http://ec2-15-207-117-224.ap-south-1.compute.amazonaws.com:8000/"
+
+        val intercepter = HttpLoggingInterceptor().apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
+        }
+        val client = OkHttpClient.Builder().apply {
+            this.addInterceptor(intercepter)
+                // time out setting
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(20,TimeUnit.SECONDS)
+                .writeTimeout(25,TimeUnit.SECONDS)
+
+        }.build()
+
+        val retrofit =  Retrofit.Builder()
+            .baseUrl(url)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        return retrofit.create(AuthService::class.java)
+    }
+
+    @Provides
+    fun getAuthRepo(authService : AuthService, sharedprefUtil: SharedprefUtil) : AuthRepo{
+        return AuthRepo(authService, sharedprefUtil)
     }
 }
