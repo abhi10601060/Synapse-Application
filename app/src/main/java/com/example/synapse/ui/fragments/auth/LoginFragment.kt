@@ -79,6 +79,7 @@ class LoginFragment : Fragment(R.layout.fragment_login_screen) {
                     is Resource.Error -> {
                         progressBar.visibility = View.GONE
                         loginBtn.isClickable = true
+                        emailEdt.requestFocus()
                         emailEdt.setError("Wrong Credentials, Please recheck.")
                     }
 

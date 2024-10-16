@@ -1,5 +1,6 @@
 package com.example.synapse.repo
 
+import android.util.Log
 import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.req.AuthenticationInput
 import com.example.synapse.model.res.AuthenticationOutput
@@ -34,7 +35,8 @@ class AuthRepo @Inject constructor(
     }
 
     private fun handleAuthOutput(res : Response<AuthenticationOutput>) : Resource<AuthenticationOutput>{
-        if (res.isSuccessful && res.body() != null){
+        Log.d(TAG, "handleAuthOutput: code : = ${res.code()}")
+        if (res.isSuccessful && res.body() != null && res.code() == 200){
             return Resource.Success(data =  res.body()!!)
         }
         return Resource.Error()

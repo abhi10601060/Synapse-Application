@@ -77,6 +77,7 @@ class SignupFragment : Fragment(R.layout.fragment_signup_screen){
                     is Resource.Error -> {
                         progressBar.visibility = View.GONE
                         signUpBtn.isClickable = true
+                        emailEdt.requestFocus()
                         emailEdt.setError("User exists already.")
                     }
 
