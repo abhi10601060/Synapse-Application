@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,6 +18,8 @@ import com.example.synapse.network.Resource
 import com.example.synapse.ui.activities.Authentication
 import com.example.synapse.ui.activities.MainActivity
 import com.example.synapse.viemodel.AuthViewModel
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,8 +63,23 @@ class LoginFragment : Fragment(R.layout.fragment_login_screen) {
                 emailEdt.setError("Empty Credentials, Please recheck.")
                 return@OnClickListener
             }
-            val authInput = AuthenticationInput(emailEdt.text.toString().trim(), passEdt.text.toString().trim())
-            viewModel.login(authInput)
+            getSessionTokenFromFirebase()
+        })
+    }
+
+    private fun getSessionTokenFromFirebase() {
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (task.isSuccessful){
+                val token = task.result
+                Log.d(TAG, "onCreate: token is from $TAG : $token")
+                val authInput = AuthenticationInput(emailEdt.text.toString().trim(), passEdt.text.toString().trim(), token)
+                viewModel.login(authInput)
+            }
+            else{
+                Log.d(TAG, "onCreate: token registration failed from $TAG")
+                Toast.makeText(requireContext() , "Something went wrong!! please try again.", Toast.LENGTH_LONG).show()
+            }
         })
     }
 

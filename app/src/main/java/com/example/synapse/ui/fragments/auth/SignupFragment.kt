@@ -2,18 +2,23 @@ package com.example.synapse.ui.fragments.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.req.AuthenticationInput
 import com.example.synapse.network.Resource
+import com.example.synapse.repo.TAG
 import com.example.synapse.ui.activities.Authentication
 import com.example.synapse.ui.activities.MainActivity
 import com.example.synapse.viemodel.AuthViewModel
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -57,9 +62,23 @@ class SignupFragment : Fragment(R.layout.fragment_signup_screen){
                 confirmPassEdt.setError("Confirm password doesn't match")
                 return@OnClickListener
             }
-            val authInput =
-                AuthenticationInput(emailEdt.text.toString().trim(), confirmPassEdt.text.toString().trim())
-            viewModel.signup(authInput)
+            getFirebaseSessionToken()
+        })
+    }
+
+    private fun getFirebaseSessionToken() {
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (task.isSuccessful){
+                val token = task.result
+                Log.d(TAG, "onCreate: token is from $TAG : $token")
+                val authInput = AuthenticationInput(emailEdt.text.toString().trim(), confirmPassEdt.text.toString().trim(), token)
+                viewModel.signup(authInput)
+            }
+            else{
+                Log.d(TAG, "onCreate: token registration failed")
+                Toast.makeText(requireContext() , "Something went wrong!! please try again.", Toast.LENGTH_LONG).show()
+            }
         })
     }
 
