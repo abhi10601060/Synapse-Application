@@ -1,6 +1,8 @@
 package com.example.synapse.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -30,6 +32,7 @@ import com.example.synapse.R
 import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.network.Resource
+import com.example.synapse.ui.activities.Authentication
 import com.example.synapse.viemodel.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +59,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private lateinit var userBio : TextView
     private lateinit var userBioEdt : EditText
     private lateinit var subsCount : TextView
+    private lateinit var logoutBtn : ImageView
 
     private lateinit var  resultLauncher : ActivityResultLauncher<Intent>
     private lateinit var changedImageBase64 : String
@@ -194,6 +198,25 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             profileViewModel.updateProfilePic(changedImageBase64)
             profileViewModel.closeEditImageState()
         })
+
+        logoutBtn.setOnClickListener(View.OnClickListener {
+            showConfirmLogoutDialog()
+        })
+    }
+
+    private fun showConfirmLogoutDialog() {
+        val confirmDialog = AlertDialog.Builder(context)
+            .setTitle("Are you sure, you want to logout?")
+            .setNegativeButton("No", DialogInterface.OnClickListener { dialog, i ->
+                dialog.dismiss()
+            })
+            .setPositiveButton("yes", DialogInterface.OnClickListener { dialog, i ->
+                profileViewModel.logout()
+                val intent = Intent(activity, Authentication::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            })
+        confirmDialog.show()
     }
 
     private fun loadImageFromProfileDetails() {
@@ -306,5 +329,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         profilePic = view.findViewById(R.id.profilePictureImg)
         userName = view.findViewById(R.id.profileName)
         subsCount = view.findViewById(R.id.profileSubscriberTxt)
+        logoutBtn = view.findViewById(R.id.profileLogoutImg)
     }
 }

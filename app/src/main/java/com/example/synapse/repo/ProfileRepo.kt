@@ -80,4 +80,8 @@ class ProfileRepo @Inject constructor(
     fun addShubhamToken(){
         sharedprefUtil.addShubhamData()
     }
+
+    fun logout(){
+        sharedprefUtil.deleteString(SharedprefUtil.USER_TOKEN_KEY)
+    }
 }

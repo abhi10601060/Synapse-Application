@@ -84,4 +84,10 @@ class ProfileViewModel @Inject constructor(
             profileRepo.updateBio(bio)
         }
     }
+
+    fun logout(){
+        viewModelScope.launch(Dispatchers.IO) {
+            profileRepo.logout()
+        }
+    }
 }
