@@ -20,6 +20,15 @@
             />
 
         <ImageView
+            android:id="@+id/homeSearchIcon"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/homeNotificationImg"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/search_24"/>
+
+        <ImageView
             android:id="@+id/homeNotificationImg"
             android:layout_width="28dp"
             android:layout_height="28dp"
@@ -30,6 +39,50 @@
 
     </RelativeLayout>
 
+    <FrameLayout
+        android:id="@+id/homeSearchFrame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/homeCustomToolbar">
+
+        <RelativeLayout
+            android:id="@+id/homeSearchRL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <EditText
+                android:id="@+id/homeSearchEdt"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:background="@drawable/highlited_rect"
+                android:layout_marginStart="10dp"
+                android:paddingEnd="10dp"
+                android:hint="Search here..."
+                android:paddingVertical="5dp"
+                android:paddingStart="10dp"
+                android:textColor="@color/offWhite"
+                android:textColorHint="@color/offWhite"
+
+                android:layout_marginEnd="10dp"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:imeOptions="actionSearch"
+                android:layout_toLeftOf="@id/homeSearchCloseImg"/>
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/close_blue_24"
+                android:layout_centerVertical="true"
+                android:id="@+id/homeSearchCloseImg"
+                android:layout_marginEnd="10dp"/>
+
+        </RelativeLayout>
+
+    </FrameLayout>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,12 +92,13 @@
         style="@style/BasicText"
         android:text="Refresh"
         android:textColor="@color/black"
-        android:id="@+id/homeRefreshBtn"/>
+        android:id="@+id/homeRefreshBtn"
+        android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/homeRefreshBtn"
+        android:layout_below="@id/homeSearchFrame"
         android:id="@+id/activeStreamsRV"/>
 
 </RelativeLayout>

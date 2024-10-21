@@ -8,6 +8,7 @@ import com.example.synapse.network.Resource
 import com.example.synapse.repo.MainRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,6 +17,12 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val mainRepo: MainRepo
 ) : ViewModel() {
+
+    //*******************************************************  Home Page States **************************************************
+
+    val isSearching = MutableStateFlow(false)
+
+
     val allActiveStreams : StateFlow<Resource<AllActiveStreamOutput>>
         get() = mainRepo.activeStreams
 

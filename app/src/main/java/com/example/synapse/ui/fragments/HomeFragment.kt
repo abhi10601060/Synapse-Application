@@ -1,13 +1,22 @@
 package com.example.synapse.ui.fragments
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.synapse.R
@@ -15,6 +24,7 @@ import com.example.synapse.model.res.Stream
 import com.example.synapse.network.Resource
 import com.example.synapse.ui.activities.WatchStream
 import com.example.synapse.ui.adapters.ActiveStreamsAdapter
+import com.example.synapse.util.slideDown
 import com.example.synapse.viemodel.MainViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,12 +45,32 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
 
     private lateinit var refreshBtn : Button
     private lateinit var activeStreamsRV : RecyclerView
+    private lateinit var searchBtn : ImageView
+    private lateinit var searchFrame : FrameLayout
+    private lateinit var searchBox : EditText
+    private lateinit var searchRL : RelativeLayout
+    private lateinit var searchCloseBtn : ImageView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createView(view)
         setOnClicks()
         observeActiveStreams()
+        observeSearchState()
+    }
+
+    private fun observeSearchState() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            mainViewModel.isSearching.collect{
+                if (it){
+                    searchFrame.visibility = View.VISIBLE
+                    searchRL.slideDown(300,0)
+                }
+                else{
+                    searchFrame.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun observeActiveStreams() {
@@ -84,11 +114,39 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
         refreshBtn.setOnClickListener(View.OnClickListener {
             mainViewModel.getAllActiveStreams()
         })
+
+        searchBtn.setOnClickListener(View.OnClickListener {
+            lifecycleScope.launch {
+                mainViewModel.isSearching.emit(true)
+            }
+        })
+
+        searchCloseBtn.setOnClickListener(View.OnClickListener {
+            lifecycleScope.launch {
+                mainViewModel.isSearching.emit(false)
+            }
+        })
+
+        searchBox.setOnEditorActionListener(TextView.OnEditorActionListener { textView, actionId, keyEvent ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH){
+                val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(searchBox.windowToken, 0)
+                return@OnEditorActionListener true
+            }
+            else{
+                return@OnEditorActionListener false
+            }
+        })
     }
 
     private fun createView(view : View) {
         refreshBtn = view.findViewById(R.id.homeRefreshBtn)
         activeStreamsRV = view.findViewById(R.id.activeStreamsRV)
+        searchBtn = view.findViewById(R.id.homeSearchIcon)
+        searchBox = view.findViewById(R.id.homeSearchEdt)
+        searchRL = view.findViewById(R.id.homeSearchRL)
+        searchFrame = view.findViewById(R.id.homeSearchFrame)
+        searchCloseBtn = view.findViewById(R.id.homeSearchCloseImg)
     }
 
     override fun onStreamClicked(stream: Stream) {
