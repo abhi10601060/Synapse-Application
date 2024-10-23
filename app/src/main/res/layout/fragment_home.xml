@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/backgroundBlack">
 
     <RelativeLayout
@@ -75,12 +76,37 @@
                 android:layout_height="30dp"
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/close_blue_24"
-                android:layout_centerVertical="true"
+
                 android:id="@+id/homeSearchCloseImg"
                 android:layout_marginEnd="10dp"/>
 
-        </RelativeLayout>
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/homeSearchTabs"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_below="@id/homeSearchEdt"
+                android:background="@color/backgroundBlack"
+                android:layout_margin="5dp"
+                app:tabTextColor="@color/offWhite"
+                app:tabRippleColor="@color/synapseTheme"
+                app:tabIndicatorColor="@color/offWhite"
+                app:tabIndicatorFullWidth="true"
+                android:visibility="gone"
+                >
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Streams"
+                    />
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Peoples"
+                    />
 
+            </com.google.android.material.tabs.TabLayout>
+
+        </RelativeLayout>
     </FrameLayout>
 
     <Button

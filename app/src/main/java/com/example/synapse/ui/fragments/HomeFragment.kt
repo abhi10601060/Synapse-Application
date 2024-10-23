@@ -20,12 +20,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.synapse.R
+import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.res.Stream
 import com.example.synapse.network.Resource
 import com.example.synapse.ui.activities.WatchStream
 import com.example.synapse.ui.adapters.ActiveStreamsAdapter
+import com.example.synapse.ui.adapters.SearchedProfileAdapter
 import com.example.synapse.util.slideDown
 import com.example.synapse.viemodel.MainViewModel
+import com.google.android.material.tabs.TabItem
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +54,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
     private lateinit var searchBox : EditText
     private lateinit var searchRL : RelativeLayout
     private lateinit var searchCloseBtn : ImageView
+    private lateinit var searchTabLayout : TabLayout
+
+    private var searchedStreams : List<Stream> = listOf()
+    private var searchedUsers : List<ProfileDetails> = listOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -57,6 +65,111 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
         setOnClicks()
         observeActiveStreams()
         observeSearchState()
+        setUpSearchTablayout()
+        observeSearchResults()
+    }
+
+    private fun observeSearchResults() {
+        lifecycleScope.launch(Dispatchers.Default) {
+            mainViewModel.searchStreamsResult.collect{
+                when(it){
+                    is Resource.Success ->{
+                        launch(Dispatchers.Main) {
+                            searchTabLayout.visibility = View.VISIBLE
+
+                            val allStreams = it.data!!.streams
+                            searchedStreams = allStreams
+                            val adapter = ActiveStreamsAdapter(this@HomeFragment, context)
+                            adapter.submitList(allStreams)
+                            activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                            activeStreamsRV.adapter = adapter
+                            Log.d(TAG, "observeSearchResults: searched streams : $allStreams")
+                        }
+                    }
+
+                    is Resource.Loading ->{
+                        launch(Dispatchers.Main){
+                            Toast.makeText(activity,"Searched Streams Loading...", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    is Resource.Error ->{
+                        launch(Dispatchers.Main){
+                            Toast.makeText(activity,"Error ${it.message}...", Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                    is Resource.Idle ->{
+                        Log.d(TAG, "observeActiveStreams: All active streams are idle")
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch(Dispatchers.Default) {
+            mainViewModel.searchUsersResult.collect{
+                when(it){
+                    is Resource.Success ->{
+                        launch(Dispatchers.Main) {
+                            searchedUsers = it.data!!.users
+                            Log.d(TAG, "observeSearchResults: searched Users : ${it.data}")
+                        }
+                    }
+
+                    is Resource.Loading ->{
+                        launch(Dispatchers.Main){
+                            Toast.makeText(activity,"Searched Streams Loading...", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    is Resource.Error ->{
+                        launch(Dispatchers.Main){
+                            Toast.makeText(activity,"Error ${it.message}...", Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                    is Resource.Idle ->{
+                        Log.d(TAG, "observeSearchResults: All active streams are idle")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setUpSearchTablayout() {
+        searchTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(selectedTab: TabLayout.Tab?) {
+               selectedTab?.let {
+                   Log.d(TAG, "onTabSelected: ${selectedTab.position}")
+                   if (it.position == 0){
+
+                       val adapter = ActiveStreamsAdapter(this@HomeFragment, context)
+                       adapter.submitList(searchedStreams)
+                       activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                       activeStreamsRV.adapter = adapter
+
+                       Log.d(TAG, "onTabSelected: streams")
+                   }else{
+
+                       val adapter = SearchedProfileAdapter(requireContext())
+                       adapter.submitList(searchedUsers)
+                       activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                       activeStreamsRV.adapter = adapter
+
+                       Log.d(TAG, "onTabSelected: peoples")
+                   }
+               }
+            }
+
+            override fun onTabUnselected(p0: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabReselected(p0: TabLayout.Tab?) {
+
+            }
+
+        })
     }
 
     private fun observeSearchState() {
@@ -124,6 +237,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
         searchCloseBtn.setOnClickListener(View.OnClickListener {
             lifecycleScope.launch {
                 mainViewModel.isSearching.emit(false)
+                mainViewModel.getAllActiveStreams()
             }
         })
 
@@ -131,6 +245,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
             if (actionId == EditorInfo.IME_ACTION_SEARCH){
                 val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(searchBox.windowToken, 0)
+
+                mainViewModel.searchRequest(searchBox.text.toString())
+                searchTabLayout.getTabAt(0)?.select()
                 return@OnEditorActionListener true
             }
             else{
@@ -147,6 +264,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
         searchRL = view.findViewById(R.id.homeSearchRL)
         searchFrame = view.findViewById(R.id.homeSearchFrame)
         searchCloseBtn = view.findViewById(R.id.homeSearchCloseImg)
+        searchTabLayout = view.findViewById(R.id.homeSearchTabs)
     }
 
     override fun onStreamClicked(stream: Stream) {

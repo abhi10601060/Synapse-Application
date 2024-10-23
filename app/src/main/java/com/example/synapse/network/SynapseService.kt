@@ -10,6 +10,8 @@ import com.example.synapse.model.res.WatchStreamOutput
 import com.example.synapse.model.res.AllActiveStreamOutput
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.ResponseMessageOutput
+import com.example.synapse.model.res.SearchStreamsOutput
+import com.example.synapse.model.res.SearchUserOutput
 import com.example.synapse.model.res.StopStreamOutput
 import com.example.synapse.model.res.StartStreamOutput
 import com.example.synapse.model.res.SubscriptionsOutput
@@ -127,5 +129,23 @@ interface SynapseService {
     suspend fun getAllSubscriptions(
         @Header("Authentication-Token") token: String
     ) : Response<SubscriptionsOutput>
+
+
+    //************************************************ Search *****************************************************************
+
+    @GET("stream/search/{searchParam}")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun getSearchedStreams(
+        @Header("Authentication-Token") token: String,
+        @Path("searchParam") searchParam : String
+    ) : Response<SearchStreamsOutput>
+
+    @GET("user/search/{searchParam}")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun getSearchedUsers(
+        @Header("Authentication-Token") token: String,
+        @Path("searchParam") searchParam : String
+    ) : Response<SearchUserOutput>
+
 
 }

@@ -3,6 +3,8 @@ package com.example.synapse.viemodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synapse.model.res.AllActiveStreamOutput
+import com.example.synapse.model.res.SearchStreamsOutput
+import com.example.synapse.model.res.SearchUserOutput
 import com.example.synapse.model.res.SubscriptionsOutput
 import com.example.synapse.network.Resource
 import com.example.synapse.repo.MainRepo
@@ -22,6 +24,11 @@ class MainViewModel @Inject constructor(
 
     val isSearching = MutableStateFlow(false)
 
+    val searchStreamsResult : StateFlow<Resource<SearchStreamsOutput>>
+        get() = mainRepo.searchedStreams
+
+    val searchUsersResult : StateFlow<Resource<SearchUserOutput>>
+        get() = mainRepo.searchedUsers
 
     val allActiveStreams : StateFlow<Resource<AllActiveStreamOutput>>
         get() = mainRepo.activeStreams
@@ -33,6 +40,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun searchRequest(searchParam : String){
+        viewModelScope.launch(Dispatchers.IO) {
+            mainRepo.searchStreams(searchParam)
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            mainRepo.searchPeoples(searchParam)
+        }
+    }
 
 
     //******************************************************* Subscription Page **************************************************
