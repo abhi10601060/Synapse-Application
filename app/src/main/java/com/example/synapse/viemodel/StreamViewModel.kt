@@ -199,12 +199,12 @@ class StreamViewModel @Inject constructor(
         }
     }
 
-    fun startScreenCapture(roomName : String, mediaProjectionIntent: Intent?){
+    fun startScreenCapture(startStreamInput: StartStreamInput, mediaProjectionIntent: Intent?){
         this.isScreenCaptureRequest = true
         this.mediaProjectionIntent = mediaProjectionIntent
         viewModelScope.launch(Dispatchers.IO) {
             _streamStatus.emit(STREAM_STATUS_GOING_LIVE)
-//            streamRepo.startStream(roomName)
+            streamRepo.startStream(startStreamInput)
         }
     }
 

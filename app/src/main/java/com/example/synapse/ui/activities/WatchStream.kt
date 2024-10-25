@@ -25,6 +25,10 @@ import com.example.synapse.model.res.Stream
 import com.example.synapse.network.Resource
 import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.util.slideDown
+import com.example.synapse.viemodel.STREAM_STATUS_IDLE
+import com.example.synapse.viemodel.STREAM_STATUS_LIVE_ERROR
+import com.example.synapse.viemodel.STREAM_STATUS_LOADED
+import com.example.synapse.viemodel.STREAM_STATUS_LOADING
 import com.example.synapse.viemodel.WatchStreamViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -84,8 +88,9 @@ class WatchStream : AppCompatActivity() {
         createView()
         setOnClicks()
         setStreamActionListeners()
-//        setLiveChatListener()
-//        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
+        setStreamStatusListner()
+        setLiveChatListener()
+        watchStreamViewModel.init(surfaceViewRenderer, LiveKit.create(applicationContext))
 
         intent?.let {
             incomingStreamJson = it.getStringExtra("stream").toString()
@@ -105,6 +110,33 @@ class WatchStream : AppCompatActivity() {
                 return@setOnEditorActionListener true
             }
             return@setOnEditorActionListener false
+        }
+    }
+
+    private fun setStreamStatusListner() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            watchStreamViewModel.streamStatus.collect{
+                when(it){
+                    STREAM_STATUS_LOADED ->{
+                        loadingStreamRL.visibility = View.GONE
+                        surfaceViewRenderer.visibility = View.VISIBLE
+                    }
+
+                    STREAM_STATUS_LOADING ->{
+                        loadingStreamRL.visibility = View.VISIBLE
+                        surfaceViewRenderer.visibility = View.INVISIBLE
+                    }
+
+                    STREAM_STATUS_LIVE_ERROR ->{
+                        Toast.makeText(this@WatchStream, "Error while connecting stream!!!", Toast.LENGTH_SHORT).show()
+                    }
+
+                    STREAM_STATUS_IDLE ->{
+                        Log.d(TAG, "setStreamStatusListner: Stream status idle" )
+                    }
+
+                }
+            }
         }
     }
 
@@ -202,13 +234,13 @@ class WatchStream : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart: called")
-//        watchStreamViewModel.watchStream(incomingStream.streamId)
+        watchStreamViewModel.watchStream(incomingStream.streamId)
     }
 
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause: called")
-//        watchStreamViewModel.closeStream()
+        watchStreamViewModel.closeStream()
     }
 
     private fun setOnClicks() {

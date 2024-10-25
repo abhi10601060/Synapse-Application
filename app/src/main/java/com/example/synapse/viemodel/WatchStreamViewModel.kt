@@ -122,7 +122,7 @@ class WatchStreamViewModel @Inject constructor(
                                 val width = event.publication.dimensions?.width
 
                                 Log.d("Livekit", "Remote stream startStream: height : $height and width : $width")
-//                                _streamStatus.emit(STREAM_STATUS_LOADED)
+                                _streamStatus.emit(STREAM_STATUS_LOADED)
                             }
                         }
                         else{
@@ -139,7 +139,7 @@ class WatchStreamViewModel @Inject constructor(
                     is RoomEvent.Connected ->{
                         Log.d(TAG, "activateRoomEventListener: connected")
 
-                        _streamStatus.emit(STREAM_STATUS_LOADING)
+                        _streamStatus.emit(STREAM_STATUS_LOADED)
                         viewer = liveKitRoom.localParticipant
                     }
 
@@ -150,7 +150,7 @@ class WatchStreamViewModel @Inject constructor(
 
                     is RoomEvent.FailedToConnect ->{
                         Log.d(TAG, "activateRoomEventListener: failedToConnect")
-
+                        _streamStatus.emit(STREAM_STATUS_LIVE_ERROR)
                     }
 
                     else ->{

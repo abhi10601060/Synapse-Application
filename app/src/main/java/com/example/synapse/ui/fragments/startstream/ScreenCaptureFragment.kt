@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
+import com.example.synapse.model.req.StartStreamInput
 import com.example.synapse.ui.custom.CustomChatBox
 import com.example.synapse.viemodel.StreamViewModel
 import com.google.gson.Gson
@@ -39,7 +40,11 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     private lateinit var chatEdt : EditText
     @Inject lateinit var gson : Gson
 
-    private var name : String? = null
+    private var title : String? = null
+    private var desc : String = ""
+    private var thumbnail : String = ""
+    private var tags : String = ""
+    private var toSave : String? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,9 +56,12 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
             activity?.let { LiveKit.create(it.applicationContext) })
 
         arguments?.let {
-            name = it.getString("name")
-            Log.d(TAG, "onViewCreated: received name : $name")
-            if (name != null) {
+            title = it.getString("title")
+            desc = it.getString("desc").toString()
+            tags = it.getString("tags").toString()
+            thumbnail = it.getString("thumbnail").toString()
+            Log.d(TAG, "onViewCreated: received name : $title")
+            if (title != null) {
                 askMediaProjectionPermission()
             }
         }
@@ -102,7 +110,7 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
         if (requestCode == 1){
             Log.d("LiveKit", "onActivityResult: mediaprojection intent received")
             lifecycleScope.launch {
-                name?.let { streamViewModel.startScreenCapture(it, data) }
+                title?.let { streamViewModel.startScreenCapture(StartStreamInput(title!!, desc, tags, thumbnail, false), data) }
             }
         }
     }
