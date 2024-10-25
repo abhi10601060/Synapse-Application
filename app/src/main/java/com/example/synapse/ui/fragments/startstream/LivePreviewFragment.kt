@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.synapse.R
+import com.example.synapse.ui.activities.ScreenCapture
 import com.example.synapse.util.IntentLabel
 import com.example.synapse.util.IntentValue
 import dagger.hilt.android.AndroidEntryPoint
@@ -80,7 +81,13 @@ class LivePreviewFragment : Fragment(R.layout.fragment_live_preview) {
                 navController.navigate(R.id.action_livePreviewFragment_to_liveFragment, bundle)
             }
             else{
-                navController.navigate(R.id.action_livePreviewFragment_to_screenCaptureFragment, bundle)
+                val intent = Intent(activity, ScreenCapture::class.java)
+                intent.putExtra("title", text)
+                intent.putExtra("thumbnail", thumbNailBase64)
+                intent.putExtra("desc", descEdt.text.toString())
+                intent.putExtra("tags", tagsEdt.text.toString())
+//                navController.navigate(R.id.action_livePreviewFragment_to_screenCaptureFragment, bundle)
+                startActivity(intent)
             }
         })
 

@@ -1,6 +1,6 @@
-package com.example.synapse.ui.fragments.startstream
+package com.example.synapse.ui.activities
 
-import android.content.Context.MEDIA_PROJECTION_SERVICE
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
@@ -9,8 +9,12 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
-import androidx.fragment.app.Fragment
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
@@ -29,8 +33,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
-    private val TAG = "ScreenCaptureFragment"
+class ScreenCapture : AppCompatActivity() {
+
+    private val TAG = "ScreenCaptureActivity"
 
     private val streamViewModel : StreamViewModel by viewModels()
 
@@ -38,7 +43,8 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     private lateinit var stopStreamBtn : Button
     private lateinit var chatBox : CustomChatBox
     private lateinit var chatEdt : EditText
-    @Inject lateinit var gson : Gson
+    @Inject
+    lateinit var gson : Gson
 
     private var title : String? = null
     private var desc : String = ""
@@ -46,20 +52,28 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     private var tags : String = ""
     private var toSave : String? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        createView(view)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_screen_capture)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        createView()
         setLiveChatListener()
         setOnClicks()
 
-        streamViewModel.init(streamSurfaceViewRenderer,
-            activity?.let { LiveKit.create(it.applicationContext) })
+        streamViewModel.init(streamSurfaceViewRenderer, LiveKit.create(this.applicationContext))
 
-        arguments?.let {
-            title = it.getString("title")
-            desc = it.getString("desc").toString()
-            tags = it.getString("tags").toString()
-            thumbnail = it.getString("thumbnail").toString()
+        intent?.let {
+            title = it.getStringExtra("title")
+            desc = it.getStringExtra("desc").toString()
+            tags = it.getStringExtra("tags").toString()
+            thumbnail = it.getStringExtra("thumbnail").toString()
             Log.d(TAG, "onViewCreated: received name : $title")
             if (title != null) {
                 askMediaProjectionPermission()
@@ -79,6 +93,12 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        Toast.makeText(this, "Close the stream first...", Toast.LENGTH_SHORT).show()
+    }
+    
+    
     @OptIn(DelicateCoroutinesApi::class)
     private fun setLiveChatListener() {
         GlobalScope.launch(Dispatchers.Main) {
@@ -96,11 +116,14 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
     private fun setOnClicks() {
         stopStreamBtn.setOnClickListener(View.OnClickListener {
             streamViewModel.stopStream()
+            val intent = Intent(this@ScreenCapture, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
         })
     }
 
     private fun askMediaProjectionPermission() {
-        val mediaProjectionManager = activity?.getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 1)
         Log.d(TAG, "askMediaProjectionPermission: Permission asked")
     }
@@ -115,10 +138,16 @@ class ScreenCaptureFragment : Fragment(R.layout.fragment_screen_capture) {
         }
     }
 
-    private fun createView(view : View) {
-//        streamSurfaceViewRenderer = view.findViewById(R.id.stream_surface)
-//        stopStreamBtn = view.findViewById(R.id.screenCaptureStopStreamBtn)
-//        chatBox = view.findViewById(R.id.screenCaptureChatBox)
-//        chatEdt = view.findViewById(R.id.screenCaptureChatEdt)
+    private fun createView() {
+        streamSurfaceViewRenderer = findViewById(R.id.stream_surface)
+        stopStreamBtn = findViewById(R.id.screenCaptureStopStreamBtn)
+        chatBox = findViewById(R.id.screenCaptureChatBox)
+        chatEdt = findViewById(R.id.screenCaptureChatEdt)
     }
+
+    override fun onDestroy() {
+        streamViewModel.stopStream()
+        super.onDestroy()
+    }
+
 }
