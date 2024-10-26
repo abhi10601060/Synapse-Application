@@ -3,6 +3,7 @@ package com.example.synapse.repo
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.synapse.db.SharedprefUtil
+import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.req.UpdateBioInput
 import com.example.synapse.model.req.UpdateProfilePicInput
 import com.example.synapse.model.res.ProfileDetailsOutPut
@@ -83,5 +84,10 @@ class ProfileRepo @Inject constructor(
 
     fun logout(){
         sharedprefUtil.deleteString(SharedprefUtil.USER_TOKEN_KEY)
+    }
+
+    fun saveDetails(profileDetails: ProfileDetails){
+        sharedprefUtil.putString(SharedprefUtil.USER_ID, profileDetails.userName)
+        sharedprefUtil.putString(SharedprefUtil.PROFILE_PIC_URL, profileDetails.profilePictureUrl)
     }
 }

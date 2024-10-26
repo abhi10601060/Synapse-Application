@@ -9,6 +9,8 @@ class SharedprefUtil() {
         const val SHAREDPREF_ID = "synapse_pref"
         const val USER_TOKEN_KEY = "user_token"
         const val ACTIVE_STREAM_KEY = "active_stream"
+        const val USER_ID = "user_id"
+        const val PROFILE_PIC_URL = "profile_pic_url"
     }
 
     constructor(context: Context) : this(){

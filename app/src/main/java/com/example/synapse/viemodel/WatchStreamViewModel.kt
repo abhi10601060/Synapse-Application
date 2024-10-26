@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.model.req.LikeDislikeInput
 import com.example.synapse.model.req.SubscribeUnsubscribeInput
@@ -39,7 +40,8 @@ const val STREAM_STATUS_CLOSE_ERROR = "clos_error"
 @HiltViewModel
 class WatchStreamViewModel @Inject constructor(
     private val watchStreamRepo: WatchStreamRepo,
-    private val gson: Gson
+    private val gson: Gson,
+    private val sharedprefUtil: SharedprefUtil
 ) : ViewModel() {
 
     val TAG = "WatchStreamViewModel"
@@ -181,7 +183,9 @@ class WatchStreamViewModel @Inject constructor(
 
     fun sendChat(msg : String){
         viewModelScope.launch(Dispatchers.IO) {
-            val chatMessage = ChatMessage(userName = "viewer" , message = msg)
+            var userName = sharedprefUtil.getString(SharedprefUtil.USER_ID)!!
+            var profilePicUrl = sharedprefUtil.getString(SharedprefUtil.PROFILE_PIC_URL)!!
+            val chatMessage = ChatMessage(userName =  userName, message = msg, profilePicUrl = profilePicUrl, isStreamer = false)
             viewer.publishData(gson.toJson(chatMessage).toByteArray())
         }
     }

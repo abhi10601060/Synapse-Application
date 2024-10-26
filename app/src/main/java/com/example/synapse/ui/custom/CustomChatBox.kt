@@ -17,7 +17,7 @@ class CustomChatBox (
 
     private lateinit var chatBoxRv : RecyclerView
     private var chatList = ArrayList<ChatMessage>()
-    private val adapter = CustomChatBoxAdapter()
+    private val adapter = CustomChatBoxAdapter(context)
 
     init {
         val view = inflate(context, R.layout.layout_custom_chat_box, this)

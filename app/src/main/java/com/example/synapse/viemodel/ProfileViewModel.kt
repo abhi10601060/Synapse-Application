@@ -2,6 +2,7 @@ package com.example.synapse.viemodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.UpdateProfileOutput
 import com.example.synapse.network.Resource
@@ -89,5 +90,9 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             profileRepo.logout()
         }
+    }
+
+    fun saveDetails(profileDetails: ProfileDetails) {
+        profileRepo.saveDetails(profileDetails)
     }
 }

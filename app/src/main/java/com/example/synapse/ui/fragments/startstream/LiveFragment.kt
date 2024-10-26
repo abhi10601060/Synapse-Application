@@ -1,20 +1,24 @@
 package com.example.synapse.ui.fragments.startstream
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.synapse.R
+import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.model.req.StartStreamInput
 import com.example.synapse.ui.custom.CustomChatBox
@@ -46,6 +50,8 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
     private var thumbnail : String = ""
     private var tags : String = ""
     private var toSave : String? = null
+
+    @Inject lateinit var sharedprefUtil: SharedprefUtil
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,6 +85,10 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
                 val text = chatEdt.text.toString()
                 if (text.isNotBlank()){
                     streamViewModel.sendChat(text)
+                    addChatMessage(text)
+                    val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(chatEdt.getWindowToken(), 0);
+                    chatEdt.setText("")
                 }
                 return@setOnEditorActionListener true
             }
@@ -86,6 +96,11 @@ class LiveFragment : Fragment(R.layout.fragment_live) {
         }
     }
 
+    private fun addChatMessage(text: String) {
+        val userName = sharedprefUtil.getString(SharedprefUtil.USER_ID)!!
+        val profilePicUrl = sharedprefUtil.getString(SharedprefUtil.PROFILE_PIC_URL)!!
+        chatBox.addChatMessage(ChatMessage(userName, message = text, profilePicUrl, true))
+    }
     @OptIn(DelicateCoroutinesApi::class)
     private fun setLiveChatListener() {
         GlobalScope.launch(Dispatchers.Main) {

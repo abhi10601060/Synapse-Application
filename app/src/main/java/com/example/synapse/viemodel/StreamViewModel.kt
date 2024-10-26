@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.model.req.StartStreamInput
 import com.example.synapse.network.Resource
@@ -35,7 +36,8 @@ const val STREAM_STATUS_STOP_ERROR = "stop_error"
 @HiltViewModel
 class StreamViewModel @Inject constructor(
     private val streamRepo: StreamRepo,
-    private val gson : Gson
+    private val gson : Gson,
+    private val sharedprefUtil: SharedprefUtil
 )  : ViewModel(){
 
     private lateinit var liveKitRoom : Room
@@ -237,7 +239,9 @@ class StreamViewModel @Inject constructor(
 
     fun sendChat(msg : String){
         viewModelScope.launch(Dispatchers.IO) {
-            val chatMessage = ChatMessage("streamer", msg)
+            var userName = sharedprefUtil.getString(SharedprefUtil.USER_ID)!!
+            var profilePicUrl = sharedprefUtil.getString(SharedprefUtil.PROFILE_PIC_URL)!!
+            val chatMessage = ChatMessage(userName, msg, profilePicUrl, true)
             streamer.publishData(gson.toJson(chatMessage).toByteArray())
         }
     }

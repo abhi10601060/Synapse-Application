@@ -1,9 +1,11 @@
 package com.example.synapse.ui.activities
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.synapse.R
+import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.ChatMessage
 import com.example.synapse.model.req.LikeDislikeInput
 import com.example.synapse.model.req.SubscribeUnsubscribeInput
@@ -74,6 +77,7 @@ class WatchStream : AppCompatActivity() {
     private var isDisliked = false
 
     @Inject lateinit var gson : Gson
+    @Inject lateinit var sharedprefUtil: SharedprefUtil
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate: called")
@@ -106,11 +110,21 @@ class WatchStream : AppCompatActivity() {
                 val text = chatEdt.text.toString()
                 if (text.isNotBlank()){
                     watchStreamViewModel.sendChat(text)
+                    addChatMessage(text)
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(chatEdt.getWindowToken(), 0);
+                    chatEdt.setText("")
                 }
                 return@setOnEditorActionListener true
             }
             return@setOnEditorActionListener false
         }
+    }
+
+    private fun addChatMessage(text: String) {
+        val userName = sharedprefUtil.getString(SharedprefUtil.USER_ID)!!
+        val profilePicUrl = sharedprefUtil.getString(SharedprefUtil.PROFILE_PIC_URL)!!
+        chatBox.addChatMessage(ChatMessage(userName, message = text, profilePicUrl, false))
     }
 
     private fun setStreamStatusListner() {

@@ -1,5 +1,6 @@
 package com.example.synapse.ui.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +9,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
 import com.example.synapse.R
 import com.example.synapse.model.ChatMessage
 
-class CustomChatBoxAdapter: ListAdapter<ChatMessage, CustomChatBoxAdapter.MyViewHolder>(MyDiffUtil()) {
+class CustomChatBoxAdapter(private val context: Context): ListAdapter<ChatMessage, CustomChatBoxAdapter.MyViewHolder>(MyDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.layout_chat_message, parent, false)
@@ -23,6 +25,12 @@ class CustomChatBoxAdapter: ListAdapter<ChatMessage, CustomChatBoxAdapter.MyView
 
         holder.userName.text = chatItem.userName
         holder.chatMessage.text = chatItem.message
+
+        Glide.with(context)
+            .load(chatItem.profilePicUrl)
+            .into(holder.userProfileImg)
+
+        if (chatItem.isStreamer) holder.isStreamerTick.visibility = View.VISIBLE
     }
 
 

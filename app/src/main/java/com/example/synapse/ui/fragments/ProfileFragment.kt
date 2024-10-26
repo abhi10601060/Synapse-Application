@@ -149,7 +149,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
                     is Resource.Success ->{
                         Log.d(TAG, "listenToProfileDetailsOutput: ${res.data}")
-                        res.data?.let { displayProfileDetails(it.profileDetails) }
+                        res.data?.let { displayProfileDetails(it.profileDetails)
+                        saveDetailsToSahredPref(it.profileDetails)}
                     }
                     else ->{
                         Toast.makeText(context, "else block", Toast.LENGTH_SHORT).show()
@@ -157,6 +158,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 }
             }
         }
+    }
+
+    private fun saveDetailsToSahredPref(profileDetails: ProfileDetails) {
+        profileViewModel.saveDetails(profileDetails)
     }
 
     private fun displayProfileDetails(profileDetails: ProfileDetails) {
