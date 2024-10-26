@@ -250,10 +250,16 @@
         android:id="@+id/profileRecentVideosTxt"
         android:layout_below="@id/profileSubsRL"
         style="@style/BasicText"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:letterSpacing="0.1"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"/>
+        android:layout_marginTop="5dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/profileRecentVideosTxt"
+        android:id="@+id/profileRecentVideosRV"/>
 
 </RelativeLayout>

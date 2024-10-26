@@ -3,6 +3,7 @@ package com.example.synapse.network
 import com.example.synapse.model.req.LikeDislikeInput
 import com.example.synapse.model.req.StopStreamInput
 import com.example.synapse.model.req.StartStreamInput
+import com.example.synapse.model.req.StreamsByProfileInput
 import com.example.synapse.model.req.SubscribeUnsubscribeInput
 import com.example.synapse.model.req.UpdateBioInput
 import com.example.synapse.model.req.UpdateProfilePicInput
@@ -130,6 +131,13 @@ interface SynapseService {
         @Header("Authentication-Token") token: String
     ) : Response<SubscriptionsOutput>
 
+
+    @POST("stream/by-profile")
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    suspend fun getStreamsByProfiles(
+        @Header("Authentication-Token") token: String,
+        @Body streamsByProfileInput: StreamsByProfileInput
+    ) : Response<AllActiveStreamOutput>
 
     //************************************************ Search *****************************************************************
 

@@ -26,21 +26,26 @@ import androidx.annotation.RequiresExtension
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.synapse.R
 import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.res.ProfileDetailsOutPut
+import com.example.synapse.model.res.Stream
 import com.example.synapse.network.Resource
 import com.example.synapse.ui.activities.Authentication
+import com.example.synapse.ui.adapters.ActiveStreamsAdapter
 import com.example.synapse.viemodel.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment(R.layout.fragment_profile) {
+class ProfileFragment : Fragment(R.layout.fragment_profile), ActiveStreamsAdapter.ActiveStreamOnClick{
 
     private val TAG = "ProfileFragment"
     private lateinit var profileViewModel : ProfileViewModel
@@ -60,9 +65,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private lateinit var userBioEdt : EditText
     private lateinit var subsCount : TextView
     private lateinit var logoutBtn : ImageView
+    private lateinit var recentVideosRv : RecyclerView
 
     private lateinit var  resultLauncher : ActivityResultLauncher<Intent>
     private lateinit var changedImageBase64 : String
+
+
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -149,11 +157,50 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
                     is Resource.Success ->{
                         Log.d(TAG, "listenToProfileDetailsOutput: ${res.data}")
-                        res.data?.let { displayProfileDetails(it.profileDetails)
-                        saveDetailsToSahredPref(it.profileDetails)}
+                        res.data?.let {
+                            displayProfileDetails(it.profileDetails)
+                            saveDetailsToSahredPref(it.profileDetails)
+                            profileViewModel.getRecentStreams(listOf(it.profileDetails.userName))
+                            listenToRecentVideos()
+                        }
                     }
                     else ->{
                         Toast.makeText(context, "else block", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun listenToRecentVideos() {
+        CoroutineScope(Dispatchers.IO).launch {
+            profileViewModel.recentVideos.collect{
+                when(it) {
+                    is Resource.Success ->{
+                        launch(Dispatchers.Main) {
+                            val allStreams = it.data!!.streams
+                            val adapter = ActiveStreamsAdapter(this@ProfileFragment, context)
+                            adapter.submitList(allStreams)
+                            recentVideosRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                            recentVideosRv.adapter = adapter
+                            Log.d(TAG, "observeActiveStreams: active streams : $allStreams")
+                        }
+                    }
+
+                    is Resource.Loading ->{
+                        launch(Dispatchers.Main){
+                            Toast.makeText(activity,"Active Streams Loading...", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    is Resource.Error ->{
+                        launch(Dispatchers.Main){
+                            Toast.makeText(activity,"Error ${it.message}...", Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                    is Resource.Idle ->{
+                        Log.d(TAG, "observeActiveStreams: All active streams are idle")
                     }
                 }
             }
@@ -335,5 +382,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         userName = view.findViewById(R.id.profileName)
         subsCount = view.findViewById(R.id.profileSubscriberTxt)
         logoutBtn = view.findViewById(R.id.profileLogoutImg)
+        recentVideosRv = view.findViewById(R.id.profileRecentVideosRV)
+    }
+
+    override fun onStreamClicked(stream: Stream) {
+        Toast.makeText(activity, "this feature is blocked...", Toast.LENGTH_SHORT).show()
     }
 }

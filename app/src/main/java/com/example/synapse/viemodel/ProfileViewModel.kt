@@ -3,6 +3,7 @@ package com.example.synapse.viemodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synapse.model.data.ProfileDetails
+import com.example.synapse.model.res.AllActiveStreamOutput
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.UpdateProfileOutput
 import com.example.synapse.network.Resource
@@ -35,6 +36,9 @@ class ProfileViewModel @Inject constructor(
         get() = profileRepo.updateProfilePicOutput
     val updateBioOutPut : StateFlow<Resource<UpdateProfileOutput>>
         get() = profileRepo.updateBioOutput
+
+    val recentVideos : StateFlow<Resource<AllActiveStreamOutput>>
+        get() = profileRepo.recentVideos
 
     fun getOwnProfileDetails(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -94,5 +98,11 @@ class ProfileViewModel @Inject constructor(
 
     fun saveDetails(profileDetails: ProfileDetails) {
         profileRepo.saveDetails(profileDetails)
+    }
+
+    fun getRecentStreams(userNames : List<String>){
+        viewModelScope.launch(Dispatchers.IO) {
+            profileRepo.getRecentVideos(userNames)
+        }
     }
 }

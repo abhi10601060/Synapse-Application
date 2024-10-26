@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.synapse.db.SharedprefUtil
 import com.example.synapse.model.data.ProfileDetails
+import com.example.synapse.model.req.StreamsByProfileInput
 import com.example.synapse.model.req.UpdateBioInput
 import com.example.synapse.model.req.UpdateProfilePicInput
+import com.example.synapse.model.res.AllActiveStreamOutput
 import com.example.synapse.model.res.ProfileDetailsOutPut
 import com.example.synapse.model.res.UpdateProfileOutput
 import com.example.synapse.network.Resource
@@ -90,4 +92,21 @@ class ProfileRepo @Inject constructor(
         sharedprefUtil.putString(SharedprefUtil.USER_ID, profileDetails.userName)
         sharedprefUtil.putString(SharedprefUtil.PROFILE_PIC_URL, profileDetails.profilePictureUrl)
     }
+
+    private val _recentVideos = MutableStateFlow<Resource<AllActiveStreamOutput>>(Resource.Idle())
+    val recentVideos : StateFlow<Resource<AllActiveStreamOutput>>
+        get() = _recentVideos
+    suspend fun getRecentVideos(userNames : List<String>){
+        val token = sharedprefUtil.getString(SharedprefUtil.USER_TOKEN_KEY)
+        val res = token?.let { synapseService.getStreamsByProfiles(it, StreamsByProfileInput(userNames)) }
+        _recentVideos.emit(handleRecentStreams(res!!))
+    }
+
+    private fun handleRecentStreams(res : Response<AllActiveStreamOutput>) : Resource<AllActiveStreamOutput>{
+        if (res.isSuccessful && res.body() != null){
+            return Resource.Success(data = res.body()!!)
+        }
+        return Resource.Error(message = "error in profile pic update")
+    }
+
 }
