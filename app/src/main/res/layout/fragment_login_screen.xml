@@ -92,6 +92,7 @@
             android:layout_marginTop="8dp"
             android:paddingStart="10dp"
             android:maxLines="1"
+            android:inputType="textVisiblePassword"
             android:hint="Enter user name here..."
             android:textColorHint="@color/offWhite"
             android:background="@drawable/highlited_rect"
@@ -104,6 +105,7 @@
             android:textColor="@color/white"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
+            android:maxLines="1"
             android:textSize="20dp"
             android:id="@+id/login_password"
             android:layout_below="@id/login_email_edt"/>

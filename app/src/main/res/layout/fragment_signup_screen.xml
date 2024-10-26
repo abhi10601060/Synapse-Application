@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/signup_text_parent"
         android:layout_below="@id/signup_logo_parent"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         >
 
         <TextView
@@ -92,6 +92,7 @@
             android:layout_marginTop="8dp"
             android:paddingStart="10dp"
             android:maxLines="1"
+            android:inputType="textVisiblePassword"
             android:hint="Enter user name here..."
             android:textColorHint="@color/offWhite"
             android:background="@drawable/highlited_rect"

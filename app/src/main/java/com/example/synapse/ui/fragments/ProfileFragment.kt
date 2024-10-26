@@ -228,7 +228,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val res = profileViewModel.profileDetails.value
         if (res is Resource.Success){
             val profilePicUrl = res.data?.profileDetails?.profilePictureUrl
-            context?.let { Glide.with(it).load(profilePicUrl)
+            if (!profilePicUrl.isNullOrBlank()) context?.let { Glide.with(it).load(profilePicUrl)
                 .diskCacheStrategy(DiskCacheStrategy.NONE )
                 .skipMemoryCache(true)
                 .into(profilePic) }

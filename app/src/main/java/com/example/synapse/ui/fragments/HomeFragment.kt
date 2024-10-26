@@ -17,15 +17,18 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.synapse.R
 import com.example.synapse.model.data.ProfileDetails
+import com.example.synapse.model.data.Subscription
 import com.example.synapse.model.res.Stream
 import com.example.synapse.network.Resource
 import com.example.synapse.ui.activities.WatchStream
 import com.example.synapse.ui.adapters.ActiveStreamsAdapter
 import com.example.synapse.ui.adapters.SearchedProfileAdapter
+import com.example.synapse.util.IntentValue
 import com.example.synapse.util.slideDown
 import com.example.synapse.viemodel.MainViewModel
 import com.google.android.material.tabs.TabItem
@@ -37,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 
@@ -58,6 +62,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
 
     private var searchedStreams : List<Stream> = listOf()
     private var searchedUsers : List<ProfileDetails> = listOf()
+
+    @Inject lateinit var gson: Gson
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -151,7 +157,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
                        Log.d(TAG, "onTabSelected: streams")
                    }else{
 
-                       val adapter = SearchedProfileAdapter(requireContext())
+                       val adapter = SearchedProfileAdapter(requireContext(), ::onProfileClick)
                        adapter.submitList(searchedUsers)
                        activeStreamsRV.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
                        activeStreamsRV.adapter = adapter
@@ -171,6 +177,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), ActiveStreamsAdapter.Acti
 
         })
     }
+
+    fun onProfileClick(profile: ProfileDetails){
+        val subscription = Subscription(profile.userName, profile.bio, profile.profilePictureUrl, profile.totalSubs, profile.totalStreams, profile.createdOn, profile.streamStatus)
+        val bundle = Bundle()
+        bundle.putString(IntentValue.INCOMING_PROFILE, gson.toJson(subscription))
+        findNavController().navigate(R.id.action_mainMenuHome_to_profileDetailsFragment, bundle)
+    }
+
 
     private fun observeSearchState() {
         lifecycleScope.launch(Dispatchers.Main) {

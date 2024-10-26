@@ -74,7 +74,8 @@
             android:id="@+id/profilePictureImg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_launcher" />
+            android:background="@drawable/highlited_rect"
+            android:src="@drawable/profile_outline" />
 
     </androidx.cardview.widget.CardView>
     
@@ -223,7 +224,7 @@
                 android:id="@+id/profileSubscriptionsTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1253"
+                android:text="0"
                 style="@style/BasicText"
                 android:textStyle="bold"
                 android:textSize="24sp"

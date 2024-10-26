@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -14,7 +15,7 @@ import com.example.synapse.R
 import com.example.synapse.model.data.ProfileDetails
 import com.example.synapse.model.data.Subscription
 
-class SearchedProfileAdapter(private val context : Context) : ListAdapter<ProfileDetails, SearchedProfileAdapter.MyViewHolder>(MyDiffUtil()) {
+class SearchedProfileAdapter(private val context : Context, private val onClickHandler : (ProfileDetails) -> Unit) : ListAdapter<ProfileDetails, SearchedProfileAdapter.MyViewHolder>(MyDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.layout_home_searched_profile , parent, false)
@@ -30,6 +31,10 @@ class SearchedProfileAdapter(private val context : Context) : ListAdapter<Profil
 
         holder.profileId.text = profile.userName
         holder.subscriberCount.text = profile.totalSubs + " K"
+
+        holder.profileParent.setOnClickListener(View.OnClickListener {
+            onClickHandler(profile)
+        })
     }
 
 
@@ -37,6 +42,7 @@ class SearchedProfileAdapter(private val context : Context) : ListAdapter<Profil
         val profileImg : ImageView = itemView.findViewById(R.id.searched_profile_img)
         val profileId : TextView = itemView.findViewById(R.id.searched_profile_id)
         val subscriberCount : TextView = itemView.findViewById(R.id.searched_profile_subs)
+        val profileParent : RelativeLayout = itemView.findViewById(R.id.searchedProfileParent)
     }
 
     class MyDiffUtil : DiffUtil.ItemCallback<ProfileDetails>(){
